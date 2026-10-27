@@ -1,0 +1,991 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>Kalendarz Tranzytów</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&family=Karla:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+@font-face{font-family:"AstroGlyphs";src:url(data:__FONTMIME__;base64,__GLYPHFONT__) format("__FONTFMT__");font-display:block}
+
+/* Układ: nocne niebo z mosiężnym instrumentem. Nagłówek z tarczą-sigilem, pod nim zakładki Dzień / Tydzień / Miesiąc.
+   Dzień: data z kursywą Cormorant, oś 24 h z pasmami Księżyca, lista zdarzeń po lewej, koło zodiaku i pozycje po prawej. */
+:root{
+  color-scheme:dark;
+  --ink-0:#08071a; --ink-1:#100f2a; --ink-2:#18163b; --ink-3:#221f4d;
+  --line:#2f2b66; --line-soft:#211e4a;
+  --text:#ece8f7; --text-dim:#b0abd0; --text-faint:#7f7aa8;
+  --gold:#e3c07c; --gold-dim:#a98b52; --moon:#d3d7f2;
+  --hard:#f08f7e; --soft:#76d0bb; --conj:#e3c07c; --ingress:#ab9ff2; --station:#f2b562; --phase:#dfe2f6;
+  --fire:#e8987c; --earth:#b6c47e; --air:#8cc2e8; --water:#9097e8;
+  --f-display:"Cormorant Garamond","Cormorant",Georgia,"Times New Roman",serif;
+  --f-body:"Karla","Segoe UI",system-ui,-apple-system,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --f-glyph:"AstroGlyphs","DejaVu Sans","Segoe UI Symbol","Apple Symbols",sans-serif;
+}
+*{box-sizing:border-box}
+html{background:var(--ink-0)}
+body{
+  margin:0;color:var(--text);font:400 16px/1.55 var(--f-body);
+  background:
+    radial-gradient(1100px 620px at 82% -8%,#2a236a66,transparent 62%),
+    radial-gradient(900px 560px at -6% 14%,#46215f45,transparent 60%),
+    var(--ink-0);
+  min-height:100%;
+}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;background-image:var(--stars);opacity:.8}
+.wrap{position:relative;z-index:1;max-width:1260px;margin:0 auto;padding-block:20px 40px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px;border-radius:3px}
+.g{font-family:var(--f-glyph);font-variant-emoji:text;font-style:normal;font-weight:400;line-height:1}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+
+/* nagłówek */
+.top{display:flex;align-items:flex-end;justify-content:space-between;gap:16px 28px;flex-wrap:wrap;padding-bottom:14px;border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:14px;min-width:0}
+.brand svg{flex:none;width:46px;height:46px}
+.brand h1{margin:0;font:600 clamp(26px,4vw,34px)/1 var(--f-display);letter-spacing:.01em;text-wrap:balance}
+.brand p{margin:4px 0 0;font:500 11.5px/1.3 var(--f-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--text-faint)}
+.tabs{display:flex;gap:4px}
+.tabs button{background:none;border:0;padding:8px 14px 9px;font:500 13px/1 var(--f-body);letter-spacing:.14em;text-transform:uppercase;color:var(--text-dim);border-bottom:2px solid transparent;margin-bottom:-15px}
+.tabs button:hover{color:var(--text)}
+.tabs button[aria-selected="true"]{color:var(--gold);border-bottom-color:var(--gold)}
+
+/* nawigacja okresu */
+.nav{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.btn{background:var(--ink-2);border:1px solid var(--line);border-radius:6px;min-height:40px;min-width:40px;padding:0 14px;display:inline-flex;align-items:center;justify-content:center;gap:8px;color:var(--text)}
+.btn:hover{border-color:var(--gold-dim);background:var(--ink-3)}
+.btn[disabled]{opacity:.35;cursor:not-allowed}
+.btn.gold{border-color:var(--gold-dim);color:var(--gold)}
+.field{background:var(--ink-2);border:1px solid var(--line);border-radius:6px;min-height:40px;padding:0 10px;font-family:var(--f-mono);font-size:14px;max-width:100%}
+select.field{padding-right:6px}
+input.field::-webkit-calendar-picker-indicator{filter:invert(.85)}
+
+.dayhead{display:flex;justify-content:space-between;align-items:flex-end;gap:18px;flex-wrap:wrap;margin:26px 0 18px}
+.dayhead .wd{font:500 12.5px/1 var(--f-mono);letter-spacing:.2em;text-transform:uppercase;color:var(--gold)}
+.dayhead h2{margin:8px 0 0;font:italic 500 clamp(44px,8vw,84px)/.95 var(--f-display);letter-spacing:-.01em}
+.dayhead h2 small{font:400 15px/1 var(--f-mono);letter-spacing:.08em;color:var(--text-faint);margin-left:10px;font-style:normal}
+.hd2{margin:0;font:italic 500 clamp(30px,5vw,46px)/1.05 var(--f-display)}
+.sec-title{margin:0 0 12px;font:500 12px/1 var(--f-mono);letter-spacing:.2em;text-transform:uppercase;color:var(--gold)}
+
+/* oś 24 h */
+.strip{position:relative;margin:0 0 24px}
+.strip-bar{position:relative;height:60px;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--ink-1)}
+.seg{position:absolute;top:0;bottom:0;display:flex;align-items:flex-start;gap:6px;padding:6px 8px;border-right:1px solid var(--line);overflow:hidden;white-space:nowrap;font-size:12.5px;color:var(--text)}
+.seg .g{font-size:16px}
+.seg.fire{background:linear-gradient(180deg,#e8987c2e,#e8987c0d)}.seg.earth{background:linear-gradient(180deg,#b6c47e2b,#b6c47e0d)}
+.seg.air{background:linear-gradient(180deg,#8cc2e82b,#8cc2e80d)}.seg.water{background:linear-gradient(180deg,#9097e82e,#9097e80d)}
+.seg.fire .g{color:var(--fire)}.seg.earth .g{color:var(--earth)}.seg.air .g{color:var(--air)}.seg.water .g{color:var(--water)}
+.voc{position:absolute;bottom:0;height:16px;background:repeating-linear-gradient(135deg,#ffffff1f 0 4px,transparent 4px 8px);border-top:1px dashed var(--text-faint);font:500 10px/16px var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);padding-left:6px;overflow:hidden;white-space:nowrap}
+.dot{position:absolute;bottom:20px;width:11px;height:11px;margin-left:-5.5px;border-radius:50%;border:0;padding:0;background:var(--gold);box-shadow:0 0 0 2px var(--ink-1)}
+.dot.minor{width:7px;height:7px;margin-left:-3.5px;bottom:23px;opacity:.85}
+.dot.hard{background:var(--hard)}.dot.soft{background:var(--soft)}.dot.ingress{background:var(--ingress)}.dot.station{background:var(--station)}.dot.phase{background:var(--phase)}.dot.minor{background:var(--text-dim)}
+.nowline{position:absolute;top:-6px;bottom:-6px;width:2px;background:var(--gold);z-index:2}
+.nowline::after{content:"teraz";position:absolute;top:-16px;left:-14px;font:500 10px/1 var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--gold)}
+.hours{position:relative;height:18px;margin-top:6px;font:400 11px/18px var(--f-mono);color:var(--text-faint)}
+.hours span{position:absolute;transform:translateX(-50%)}
+.hours span:first-child{transform:none}.hours span:last-child{transform:translateX(-100%)}
+
+/* układ dnia */
+.dayGrid{display:grid;grid-template-columns:minmax(0,1fr) 400px;gap:34px;align-items:start}
+.panel{background:var(--ink-1);border:1px solid var(--line);border-radius:10px;padding:18px}
+.summary{margin-bottom:18px;display:grid;gap:10px}
+.summary p{margin:0;color:var(--text);font-size:16.5px;line-height:1.5}
+.summary p b{font-weight:700;color:var(--gold)}
+.filter{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:6px}
+.seg-switch{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.seg-switch button{background:var(--ink-1);border:0;padding:9px 13px;font-size:13.5px;color:var(--text-dim)}
+.seg-switch button[aria-pressed="true"]{background:var(--ink-3);color:var(--gold)}
+.tl{list-style:none;margin:0;padding:0}
+.ev{display:grid;grid-template-columns:62px 112px minmax(0,1fr);gap:4px 16px;padding:15px 0;border-top:1px solid var(--line-soft);scroll-margin-top:12px}
+.ev:first-child{border-top-color:var(--line)}
+.ev.flash{animation:flash 1.6s ease-out}
+@keyframes flash{0%{background:#e3c07c2e}100%{background:transparent}}
+.ev time{font:500 15px/1.9 var(--f-mono);color:var(--gold)}
+.ev.minor time{color:var(--text-dim);font-weight:400}
+.ev .plate{display:flex;align-items:center;gap:7px;font-size:23px;color:var(--text);min-height:30px;flex-wrap:nowrap;white-space:nowrap}
+.ev .plate .asp{font-size:17px}
+.ev .plate svg{flex:none}
+.ev.minor .plate{font-size:19px}
+.ev.hard .plate .asp,.ev.hard .tag{color:var(--hard)}
+.ev.soft .plate .asp,.ev.soft .tag{color:var(--soft)}
+.ev.conj .plate .asp,.ev.conj .tag{color:var(--conj)}
+.ev.ingress .plate .arr,.ev.ingress .tag{color:var(--ingress)}
+.ev.station .tag{color:var(--station)}
+.ev.phase .tag{color:var(--phase)}
+.ev h3{margin:0;font:700 16.5px/1.35 var(--f-body);display:flex;flex-wrap:wrap;gap:2px 10px;align-items:baseline}
+.ev.minor h3{font-weight:500;font-size:15.5px}
+.ev .tag{font:500 10.5px/1 var(--f-mono);letter-spacing:.16em;text-transform:uppercase;color:var(--text-faint)}
+.ev p{margin:3px 0 0;color:var(--text-dim);font-size:14.5px;line-height:1.55;max-width:66ch}
+.ev.minor p{font-size:14px}
+.ev .body{grid-column:3;min-width:0}
+.ev .lead{grid-column:1/3;display:contents}
+.nowrow{display:flex;align-items:center;gap:10px;margin:2px 0;font:500 11px/1 var(--f-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
+.nowrow::before,.nowrow::after{content:"";height:1px;background:var(--gold-dim);flex:1}
+.empty{padding:26px 0;color:var(--text-dim)}
+
+/* prawa kolumna */
+.side{position:sticky;top:12px;display:grid;gap:18px}
+.wheelbox{padding:12px}
+.wheelbox svg{display:block;width:100%;height:auto}
+.legend{display:flex;gap:14px;flex-wrap:wrap;padding:6px 8px 2px;font-size:12.5px;color:var(--text-dim)}
+.legend i{display:inline-block;width:18px;height:2px;vertical-align:middle;margin-right:6px}
+.moonCard{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 16px;align-items:center}
+.moonCard .ph{grid-row:span 3}
+.moonCard .nm{font:italic 500 26px/1.1 var(--f-display)}
+.moonCard .sub{color:var(--text-dim);font-size:14px}
+.moonCard .vocnote{grid-column:1/-1;margin-top:10px;padding-top:10px;border-top:1px solid var(--line-soft);font-size:14px;color:var(--text-dim)}
+table.pos{width:100%;border-collapse:collapse;font-size:14.5px}
+table.pos td{padding:7px 4px;border-top:1px solid var(--line-soft);vertical-align:middle}
+table.pos tr:first-child td{border-top:0}
+table.pos .pg{font-size:19px;width:30px;color:var(--moon)}
+table.pos .pn{color:var(--text)}
+table.pos .ps{text-align:right;white-space:nowrap}
+table.pos .ps .g{font-size:16px;margin-right:6px}
+table.pos .rx{display:inline-block;margin-left:6px;font:500 11px/1 var(--f-mono);color:var(--station);border:1px solid var(--station);border-radius:3px;padding:2px 4px}
+.fire-t{color:var(--fire)}.earth-t{color:var(--earth)}.air-t{color:var(--air)}.water-t{color:var(--water)}
+
+/* tydzień */
+.weekTop{display:grid;grid-template-columns:minmax(0,1fr);gap:16px;margin:22px 0 22px}
+.theme-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px 28px}
+.theme{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 12px;align-items:start}
+.theme .plate{font-size:20px;white-space:nowrap;display:flex;gap:5px;align-items:center;padding-top:2px}
+.theme b{font-weight:700;font-size:15.5px}
+.theme .when{font:400 12px/1.4 var(--f-mono);color:var(--gold);display:block}
+.theme p{grid-column:2;margin:0;color:var(--text-dim);font-size:14px}
+.weekGrid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:0;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--ink-1)}
+.wcol{border-left:1px solid var(--line-soft);min-width:0;display:flex;flex-direction:column}
+.wcol:first-child{border-left:0}
+.whead{display:flex;justify-content:space-between;align-items:flex-start;gap:6px;width:100%;padding:12px 12px 10px;border:0;border-bottom:1px solid var(--line);background:var(--ink-2);color:inherit;text-align:left}
+.whead:hover{background:var(--ink-3)}
+.wcol .dn{font:500 11px/1 var(--f-mono);letter-spacing:.16em;text-transform:uppercase;color:var(--text-faint)}
+.wcol .dd{font:italic 500 32px/1 var(--f-display);margin-top:5px;display:block}
+.wcol.today .whead{box-shadow:inset 0 3px 0 var(--gold)}
+.wcol.today .dd{color:var(--gold)}
+.wcol .mm{display:flex;gap:6px;align-items:center;font-size:17px}
+.wlist{list-style:none;margin:0;padding:6px 0;flex:1}
+.wi{display:grid;gap:2px;padding:8px 12px;border-bottom:1px solid var(--line-soft);cursor:pointer;background:none;width:100%;text-align:left;border-left:0;border-right:0;border-top:0;color:inherit}
+.wi:hover{background:var(--ink-2)}
+.wi .t{font:400 11.5px/1.2 var(--f-mono);color:var(--gold)}
+.wi .l{display:flex;gap:5px;align-items:center;font-size:15px;white-space:nowrap;flex-wrap:wrap}
+.wi .l .asp{font-size:13px}
+.wi.hard .asp{color:var(--hard)}.wi.soft .asp{color:var(--soft)}.wi.conj .asp{color:var(--conj)}.wi.ingress .arr{color:var(--ingress)}
+.wi .s{font-size:12.5px;color:var(--text-dim);line-height:1.35}
+.wi.minor .t{color:var(--text-faint)}
+.wnone{padding:12px;font-size:13px;color:var(--text-faint)}
+
+/* miesiąc */
+.monthWrap{margin-top:18px}
+.mhead,.mgrid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr))}
+.mhead div{padding:8px 10px;font:500 11px/1 var(--f-mono);letter-spacing:.16em;text-transform:uppercase;color:var(--text-faint);border-bottom:1px solid var(--line)}
+.mgrid{border-left:1px solid var(--line-soft)}
+.mc{min-height:118px;border-right:1px solid var(--line-soft);border-bottom:1px solid var(--line-soft);padding:7px 8px 8px;background:var(--ink-1);text-align:left;display:flex;flex-direction:column;gap:5px;min-width:0;border-top:0;border-left:0;color:inherit;border-radius:0}
+.mc:hover{background:var(--ink-2)}
+.mc.out{background:transparent;opacity:.4}
+.mc.today{box-shadow:inset 0 0 0 1.5px var(--gold)}
+.mc .r1{display:flex;justify-content:space-between;align-items:center;gap:6px}
+.mc .num{font:italic 500 24px/1 var(--f-display)}
+.mc.today .num{color:var(--gold)}
+.mc .msign{font-size:15px}
+.mc .chips{display:flex;flex-direction:column;gap:3px;min-width:0}
+.chip{display:flex;align-items:center;gap:4px;font-size:13px;white-space:nowrap;overflow:hidden;color:var(--text)}
+.chip .g{font-size:13.5px}
+.chip .asp{font-size:11px}
+.chip.hard .asp{color:var(--hard)}.chip.soft .asp{color:var(--soft)}.chip.conj .asp{color:var(--conj)}.chip.ingress .arr{color:var(--ingress)}.chip.station{color:var(--station)}
+.chip.phase{color:var(--phase)}
+.chip.more{color:var(--text-faint);font-size:12px}
+.mdots{display:none}
+.mlist{margin-top:30px}
+.mrow{display:grid;grid-template-columns:128px 104px minmax(0,1fr);gap:4px 16px;padding:13px 0;border-top:1px solid var(--line-soft);cursor:pointer;background:none;width:100%;text-align:left;border-left:0;border-right:0;border-bottom:0;color:inherit}
+.mrow:hover{background:var(--ink-2)}
+.mrow .dt{font:500 13px/1.7 var(--f-mono);color:var(--gold)}
+.mrow .plate{display:flex;gap:6px;align-items:center;font-size:21px;white-space:nowrap}
+.mrow .plate .asp{font-size:15px}
+.mrow.hard .asp{color:var(--hard)}.mrow.soft .asp{color:var(--soft)}.mrow.conj .asp{color:var(--conj)}.mrow.ingress .arr{color:var(--ingress)}
+.mrow b{font-weight:700;font-size:15.5px}
+.mrow p{margin:2px 0 0;color:var(--text-dim);font-size:14px;max-width:70ch}
+
+
+/* reklama usług */
+.ad{position:relative;overflow:hidden;margin:26px 0;border:1px solid var(--gold-dim);border-radius:12px;padding:22px 24px;
+  background:radial-gradient(520px 220px at 100% 0%,#4a3a8a55,transparent 70%),linear-gradient(125deg,#241f55,#15123a);
+  display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px 30px;align-items:center}
+.ad::before{content:attr(data-glyph);position:absolute;right:-18px;bottom:-46px;font:400 190px/1 var(--f-glyph);color:#e3c07c14;pointer-events:none}
+.ad-tag{display:flex;align-items:center;gap:10px;font:500 11.5px/1 var(--f-mono);letter-spacing:.2em;text-transform:uppercase;color:var(--gold)}
+.ad-tag .g{font-size:20px}
+.ad h3{margin:10px 0 0;font:italic 600 clamp(25px,3.2vw,34px)/1.12 var(--f-display);text-wrap:balance}
+.ad p{margin:8px 0 0;color:var(--text-dim);font-size:15.5px;max-width:58ch}
+.ad-call{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;text-decoration:none;
+  background:var(--gold);color:#1b1433;border-radius:10px;padding:14px 26px 15px;box-shadow:0 0 0 4px #e3c07c33,0 10px 30px #00000066}
+.ad-call:hover{background:#f0d08e}
+.ad-call .lbl{font:700 12px/1.2 var(--f-body);letter-spacing:.14em;text-transform:uppercase}
+.ad-call .num{font:700 clamp(34px,4.6vw,46px)/1 var(--f-body);letter-spacing:.03em;font-variant-numeric:tabular-nums;white-space:nowrap}
+.ad-call .who{font:500 13px/1.2 var(--f-body)}
+.ad-site{grid-column:1;margin-top:2px;font:400 12.5px/1 var(--f-mono);letter-spacing:.08em;color:var(--text-faint)}
+@media (max-width:720px){
+  .ad{grid-template-columns:minmax(0,1fr);padding:20px 18px}
+  .ad-call{width:100%}
+  .ad::before{font-size:140px;right:-14px;bottom:-34px}
+}
+
+footer{margin-top:44px;padding-top:18px;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:12px 28px;flex-wrap:wrap;font-size:13px;color:var(--text-faint)}
+footer b{color:var(--gold);font-weight:500}
+footer .mono{letter-spacing:.04em}
+
+/* telefon i tablet */
+@media (max-width:1040px){
+  .dayGrid{grid-template-columns:minmax(0,1fr)}
+  .side{position:static;grid-template-columns:minmax(0,1fr)}
+  .side .wheelbox{max-width:520px;margin:0 auto;width:100%}
+  .weekGrid{grid-template-columns:minmax(0,1fr)}
+  .wcol{border-left:0;border-top:1px solid var(--line)}
+  .wcol:first-child{border-top:0}
+  .whead{align-items:center}
+  .wcol .dd{display:inline;margin-left:10px;font-size:28px}
+}
+@media (max-width:720px){
+  .brand svg{width:38px;height:38px}
+  .tabs{width:100%}.tabs button{flex:1;margin-bottom:-15px}
+  .ev{grid-template-columns:54px minmax(0,1fr);gap:2px 12px}
+  .ev .plate{grid-column:2;grid-row:1;font-size:21px}
+  .ev time{grid-column:1;grid-row:1}
+  .ev .body{grid-column:2;grid-row:2}
+  .mhead div{padding:6px 2px;text-align:center;letter-spacing:.04em;font-size:10px}
+  .mc{min-height:62px;padding:5px 4px;align-items:center;gap:3px}
+  .mc .r1{flex-direction:column;gap:2px}
+  .mc .num{font-size:20px}
+  .mc .chips{display:none}
+  .mdots{display:flex;gap:3px;flex-wrap:wrap;justify-content:center}
+  .mdots i{width:6px;height:6px;border-radius:50%;background:var(--gold)}
+  .mdots i.hard{background:var(--hard)}.mdots i.soft{background:var(--soft)}.mdots i.ingress{background:var(--ingress)}.mdots i.station{background:var(--station)}.mdots i.phase{background:var(--phase)}
+  .mrow{grid-template-columns:78px minmax(0,1fr)}
+  .mrow .plate{grid-column:2;grid-row:1}
+  .mrow .dt{grid-row:1}
+  .mrow .txt{grid-column:2}
+}
+@media (prefers-reduced-motion:reduce){.ev.flash{animation:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <svg viewBox="0 0 64 64" aria-hidden="true"><g fill="none" stroke="#e3c07c" stroke-width="1.4"><circle cx="32" cy="32" r="29"/><circle cx="32" cy="32" r="21" stroke-opacity=".7"/><circle cx="32" cy="32" r="5"/><g id="tk" stroke-opacity=".85"></g><path d="M32 11 L35 29 L53 32 L35 35 L32 53 L29 35 L11 32 L29 29 Z" stroke-opacity=".9"/></g></svg>
+      <div><h1>Kalendarz Tranzytów</h1><p>Warszawa · 52°14′N 21°01′E · czas polski</p></div>
+    </div>
+    <div class="tabs" role="tablist" aria-label="Widok">
+      <button role="tab" id="tab-dzien" data-v="dzien">Dzień</button>
+      <button role="tab" id="tab-tydzien" data-v="tydzien">Tydzień</button>
+      <button role="tab" id="tab-miesiac" data-v="miesiac">Miesiąc</button>
+    </div>
+  </header>
+  <main id="app" aria-live="polite"></main>
+  <footer>
+    <div>Efemerydy: Swiss Ephemeris, obliczenia dla Warszawy. Okno danych: <span id="range" class="mono"></span>.</div>
+    <div><b>Astrolog Mariusz</b> · <span class="mono">737 803 692</span> · uranian.tv</div>
+  </footer>
+</div>
+
+<script>
+(function(){
+'use strict';
+var D = /*__DATA__*/null;
+var TZ = 'Europe/Warsaw';
+
+/* ---------- słowniki ---------- */
+var PL = [
+ {n:'Słońce',g:'☉',gen:'Słońca',ins:'Słońcem'},
+ {n:'Księżyc',g:'☽',gen:'Księżyca',ins:'Księżycem'},
+ {n:'Merkury',g:'☿',gen:'Merkurego',ins:'Merkurym'},
+ {n:'Wenus',g:'♀',gen:'Wenus',ins:'Wenus'},
+ {n:'Mars',g:'♂',gen:'Marsa',ins:'Marsem'},
+ {n:'Jowisz',g:'♃',gen:'Jowisza',ins:'Jowiszem'},
+ {n:'Saturn',g:'♄',gen:'Saturna',ins:'Saturnem'},
+ {n:'Uran',g:'♅',gen:'Urana',ins:'Uranem'},
+ {n:'Neptun',g:'♆',gen:'Neptuna',ins:'Neptunem'},
+ {n:'Pluton',g:'♇',gen:'Plutona',ins:'Plutonem'},
+ {n:'Węzeł północny',g:'☊'}
+];
+var VS = '︎';
+var SG = [
+ {n:'Baran',g:'♈',gen:'Barana',loc:'Baranie',el:'fire'},
+ {n:'Byk',g:'♉',gen:'Byka',loc:'Byku',el:'earth'},
+ {n:'Bliźnięta',g:'♊',gen:'Bliźniąt',loc:'Bliźniętach',el:'air'},
+ {n:'Rak',g:'♋',gen:'Raka',loc:'Raku',el:'water'},
+ {n:'Lew',g:'♌',gen:'Lwa',loc:'Lwie',el:'fire'},
+ {n:'Panna',g:'♍',gen:'Panny',loc:'Pannie',el:'earth'},
+ {n:'Waga',g:'♎',gen:'Wagi',loc:'Wadze',el:'air'},
+ {n:'Skorpion',g:'♏',gen:'Skorpiona',loc:'Skorpionie',el:'water'},
+ {n:'Strzelec',g:'♐',gen:'Strzelca',loc:'Strzelcu',el:'fire'},
+ {n:'Koziorożec',g:'♑',gen:'Koziorożca',loc:'Koziorożcu',el:'earth'},
+ {n:'Wodnik',g:'♒',gen:'Wodnika',loc:'Wodniku',el:'air'},
+ {n:'Ryby',g:'♓',gen:'Ryb',loc:'Rybach',el:'water'}
+];
+SG.forEach(function(s){ s.g = s.g + VS; });
+var ASP = {
+ 0:{n:'koniunkcja',loc:'koniunkcji',g:'☌',t:'conj'},
+ 60:{n:'sekstyl',loc:'sekstylu',g:'✶',t:'soft'},
+ 90:{n:'kwadratura',loc:'kwadraturze',g:'□',t:'hard'},
+ 120:{n:'trygon',loc:'trygonie',g:'△',t:'soft'},
+ 180:{n:'opozycja',loc:'opozycji',g:'☍',t:'hard'}
+};
+var FUN = {
+ 0:'wola i poczucie własnej wartości',
+ 2:'myślenie, rozmowy i kontakty',
+ 3:'relacje, wartości i pieniądze',
+ 4:'działanie, energia i asertywność',
+ 5:'rozwój, szczęście i wiara w przyszłość',
+ 6:'odpowiedzialność, granice i struktury',
+ 7:'zmiana, wolność i niespodzianki',
+ 8:'intuicja, marzenia i złudzenia',
+ 9:'transformacja, władza i kontrola'
+};
+var TONE = ['odwagi i inicjatywy','spokoju, wytrwałości i zmysłowości','ciekawości i komunikacji','emocji, domu i opieki','twórczości, dumy i odwagi serca','porządku, szczegółu i troski o zdrowie','równowagi, relacji i estetyki','intensywności, głębi i prawdy','wolności, ekspansji i szukania sensu','ambicji, struktury i odpowiedzialności','niezależności, idei i wspólnoty','wrażliwości, intuicji i współczucia'];
+var DUR = {5:' Zmiana na około rok.',6:' Zmiana na około dwa i pół roku.',7:' Zmiana na około siedem lat.',8:' Zmiana na około czternaście lat.',9:' Zmiana na kilkanaście lat.'};
+var MOONSIGN = [
+ 'Nastrój żywy i niecierpliwy. Chce się działać, zaczynać i być niezależnym. Łatwo o zapalczywość.',
+ 'Potrzeba spokoju, wygody i bezpieczeństwa. Dobry czas na dobre jedzenie, dom i sprawy materialne. Opór wobec pośpiechu.',
+ 'Umysł ciekawy i ruchliwy. Sprzyja rozmowom, krótkim wyjazdom, wiadomościom i nauce. Trudniej skupić się na jednej rzeczy.',
+ 'Wrażliwość i potrzeba bliskości. Dzień dla domu i rodziny, ale też dla ochrony własnych granic emocjonalnych.',
+ 'Nastrój ciepły i wyrazisty. Chęć bycia zauważonym, zabawy i twórczości. Dobry czas na odwagę serca.',
+ 'Nastrój praktyczny i krytyczny. Dobre na porządki, zdrowie, szczegóły i pracę. Uważaj na nadmierną samokrytykę.',
+ 'Pragnienie zgody i harmonii. Sprzyja kontaktom, negocjacjom i estetyce. Trudniej o szybkie decyzje.',
+ 'Emocje głębokie i intensywne. Dobre na sprawy wymagające prawdy i skupienia; ostrożnie z zazdrością i urazami.',
+ 'Nastrój optymistyczny i wolnościowy. Chęć ruchu, nauki i szerokiej perspektywy. Łatwo o przesadę w obietnicach.',
+ 'Nastrój poważny i zadaniowy. Dobry czas na obowiązki, plany długoterminowe i dyscyplinę. Mniej miejsca na czułość.',
+ 'Dystans, niezależność i nietypowe pomysły. Sprzyja znajomym, grupom i projektom społecznym. Emocje łatwiej wyjaśniać rozumem.',
+ 'Nastrój wrażliwy, senny i empatyczny. Sprzyja intuicji, twórczości i medytacji. Łatwo o rozproszenie i chłonięcie cudzych emocji.'
+];
+/* Księżyc w aspekcie do planety: c = koniunkcja, s = sekstyl/trygon, h = kwadratura/opozycja */
+var MOONASP = {
+ 0:{s:'Emocje i wola działają razem. Łatwiej o spokój, pewność siebie i zgodę z samym sobą; ludzie wokół są życzliwsi.',h:'Wewnętrzne napięcie między potrzebami a wolą. Możliwe zmęczenie lub niezgoda ze sobą.',c:'Nowy początek emocjonalny.'},
+ 2:{c:'Uczucia i myśli łączą się w jedno. Dobry moment na szczerą rozmowę, pisanie i notatki. Nastrój łatwo wziąć za fakt.',s:'Łatwo dobrać słowa do tego, co czujesz. Sprzyja rozmowom, nauce i załatwianiu spraw na spokojnie.',h:'Głowa mówi swoje, serce swoje. Łatwo o nieporozumienia, drażliwość w rozmowie i szybkie, nieprzemyślane słowa.'},
+ 3:{c:'Czułość, potrzeba bliskości i przyjemności. Sprzyja spotkaniom, randkom, zakupom dla siebie i dbaniu o urodę.',s:'Miła, łagodna atmosfera. Dobry czas na spotkania, rozmowy o uczuciach, kontakty towarzyskie i sprawy sercowe.',h:'Potrzeba czułości zderza się z zachciankami. Możliwe humory w relacjach, wydatki z emocji i nadmiar słodkiego.'},
+ 4:{c:'Emocje pod napięciem, więcej energii i niecierpliwości. Dobre na ruch i działanie, gorsze na dyplomację.',s:'Odwaga i energia do działania. Łatwiej zacząć to, co odkładasz, i postawić granice bez kłótni.',h:'Drażliwość, zniecierpliwienie, ryzyko kłótni i pochopnych decyzji. Warto wyładować napięcie ruchem.'},
+ 5:{c:'Hojność, optymizm i poczucie, że będzie dobrze. Sprzyja planom, nauce i podróżom; uważaj na przesadę.',s:'Dobry humor i życzliwość ludzi. Sprzyja rozmowom o planach, nauce i kontaktom z mentorami.',h:'Skłonność do przesady: w jedzeniu, wydatkach i obietnicach. Entuzjazm bywa większy niż możliwości.'},
+ 6:{c:'Powaga, skupienie, czasem chłód i zmęczenie. Dobre na porządkowanie spraw i obowiązki, słabsze na towarzyskość.',s:'Spokojna, uporządkowana energia. Dobre na pracę wymagającą cierpliwości, formalności i trzeźwe decyzje.',h:'Obniżony nastrój, poczucie ciężaru lub samotności. Zmęczenie i krytycyzm wobec siebie; zadbaj o odpoczynek.'},
+ 7:{c:'Niespokojna energia i potrzeba zmiany. Możliwe niespodzianki, nagłe pomysły i zmiany planów.',s:'Świeże pomysły i nieoczekiwane, ciekawe spotkania. Dobry czas na wyjście z rutyny.',h:'Rozdrażnienie, nagłe zwroty i zmiany planów. Nerwy napięte; unikaj impulsywnych decyzji.'},
+ 8:{c:'Wyostrzona intuicja i wrażliwość; sny i wyobraźnia. Łatwo o rozproszenie i mgłę w sprawach praktycznych.',s:'Intuicja, empatia i twórcze natchnienie. Dobre na medytację, muzykę, sztukę i sny.',h:'Mgła w głowie, ucieczki w fantazje, łatwo dać się zwieść. Sprawdzaj fakty i odłóż ważne umowy.'},
+ 9:{c:'Intensywne emocje i odsłaniające się sekrety. Dobre na głęboką rozmowę i porządki wewnętrzne; uważaj na obsesje.',s:'Głębia i skupienie. Dobre na pracę nad sobą, odkrywanie prawdy i uporanie się z dawnym tematem.',h:'Napięcie, zazdrość, walka o kontrolę. Stare urazy wracają; nie wchodź w konfrontacje na gorąco.'}
+};
+/* aspekty wolnych planet: opisy własne */
+var BESPOKE = {
+ '5-6-120':'Trygon Jowisza i Saturna: rzadka równowaga między rozwojem a rozsądkiem. Sprzyja budowaniu trwałych projektów, rozsądnym inwestycjom, nauce i porządkowaniu planów na lata.',
+ '8-9-60':'Sekstyl Neptuna i Plutona: aspekt trwający całe pokolenie. Subtelne przemiany w duchowości, kulturze i zbiorowych wyobrażeniach; sprzyja pracy wewnętrznej i intuicji.',
+ '7-9-120':'Trygon Urana i Plutona: zmiany zachodzą płynnie, ale głęboko. Dobry czas na odważne przebudowy, nowe technologie i uwolnienie się od starych schematów.',
+ '7-8-60':'Sekstyl Urana i Neptuna: wizje spotykają się z innowacją. Sprzyja intuicyjnym pomysłom, nowym narzędziom i twórczym przełomom.',
+ '5-7-90':'Kwadratura Jowisza i Urana: skłonność do zrywów i ryzyka, chęć uwolnienia się od ograniczeń. Możliwe nagłe zwroty, szanse i przesadne obietnice.',
+ '5-9-120':'Trygon Jowisza i Plutona: szansa na dużą, głęboką poprawę w sprawach, które wymagały przemiany. Sprzyja finansom, wpływom i rozwojowi.',
+ '5-8-180':'Opozycja Jowisza i Neptuna: wielkie wizje i ryzyko złudzeń. Oddziel intuicję od myślenia życzeniowego; uważaj na obietnice i oszustwa.',
+ '5-7-120':'Trygon Jowisza i Urana: szczęśliwe przypadki, nowe możliwości i przełamanie rutyny. Dobry czas na zmianę i ruch ku wolności.',
+ '6-9-90':'Kwadratura Saturna i Plutona: ciężka, wymagająca presja. Konfrontacja z tym, co przestarzałe: strukturami, władzą i zobowiązaniami. Wytrwałość popłaca.',
+ '5-9-90':'Kwadratura Jowisza i Plutona: ambicje i walka o wpływy. Uważaj na przesadę i konflikty o władzę, pieniądze lub przekonania.'
+};
+
+/* ---------- czas ---------- */
+var fKey = new Intl.DateTimeFormat('en-CA',{timeZone:TZ,year:'numeric',month:'2-digit',day:'2-digit'});
+var fTime = new Intl.DateTimeFormat('pl-PL',{timeZone:TZ,hour:'2-digit',minute:'2-digit',hourCycle:'h23'});
+var fParts = new Intl.DateTimeFormat('en-GB',{timeZone:TZ,year:'numeric',month:'numeric',day:'numeric',hour:'numeric',minute:'numeric',second:'numeric',hourCycle:'h23'});
+var fWd = new Intl.DateTimeFormat('pl-PL',{timeZone:'UTC',weekday:'long'});
+var fDM = new Intl.DateTimeFormat('pl-PL',{timeZone:'UTC',day:'numeric',month:'long'});
+var fDMs = new Intl.DateTimeFormat('pl-PL',{timeZone:'UTC',day:'numeric',month:'short'});
+var fMY = new Intl.DateTimeFormat('pl-PL',{timeZone:'UTC',month:'long',year:'numeric'});
+var fMonth = new Intl.DateTimeFormat('pl-PL',{timeZone:'UTC',month:'long'});
+function keyOf(ms){ return fKey.format(ms); }
+function tm(ms){ return fTime.format(ms); }
+function utcOf(key){ var p=key.split('-'); return Date.UTC(+p[0],+p[1]-1,+p[2]); }
+function addDays(key,n){ return new Date(utcOf(key)+n*86400000).toISOString().slice(0,10); }
+function dowMon(key){ return (new Date(utcOf(key)).getUTCDay()+6)%7; }
+function offsetAt(ms){
+  var o={}; fParts.formatToParts(ms).forEach(function(p){o[p.type]=+p.value;});
+  return Date.UTC(o.year,o.month-1,o.day,o.hour,o.minute,o.second)-Math.floor(ms/1000)*1000;
+}
+function dayStart(key){
+  var base=utcOf(key);
+  var t=base-offsetAt(base-3*3600000);
+  return base-offsetAt(t);
+}
+function cap(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
+function diffDays(a,b){ return Math.round((utcOf(b)-utcOf(a))/86400000); }
+var WD3 = ['Pn','Wt','Śr','Cz','Pt','So','Nd'];
+var FIRST = D.first, LAST = D.last;
+var TODAY = (function(){ var k=keyOf(Date.now()); return k<FIRST?FIRST:(k>LAST?LAST:k); })();
+var REALTODAY = keyOf(Date.now());
+
+/* ---------- zdarzenia ---------- */
+function weightOf(e){
+  if(e.k==='P'){ return e.ecl?10:((e.ph===0||e.ph===2)?8:5); }
+  if(e.k==='S'){ return e.b>=5?8:(e.b===2?7:6); }
+  if(e.k==='I'){ return e.b===1?4:(e.b>=5?9:(e.b===0?5:6)); }
+  if(e.k==='A'){
+    if(e.a===1){ return e.b===0?2:1.5; }
+    var slowA=e.a>=5, slowB=e.b>=5, hard=ASP[e.ang].t!=='soft';
+    if(slowA&&slowB) return 9;
+    if(slowA||slowB) return hard?6:5;
+    return hard?4.5:3.5;
+  }
+  return 0;
+}
+var EV = [], VOC = [], MI = [];
+D.events.forEach(function(a){
+  var t=a[0]*60000, k=a[1], e=null;
+  if(k==='A'){
+    var x=a[2], y=a[3];
+    if(y===1){ x=1; y=0; }
+    e={k:'A',t:t,a:x,b:y,ang:a[4],pass:a[5],of:a[6]};
+  } else if(k==='I'){
+    e={k:'I',t:t,b:a[2],sign:a[3],retro:a[4]};
+    if(a[2]===1) MI.push({t:t,sign:a[3]});
+  } else if(k==='S'){
+    e={k:'S',t:t,b:a[2],retro:a[3],lon:a[4]/10};
+  } else if(k==='P'){
+    e={k:'P',t:t,ph:a[2],ecl:a[3],vis:a[4],lon:a[5]/10};
+  } else if(k==='V'){
+    VOC.push({s:t,e:a[2]*60000}); return;
+  }
+  if(e){ e.w=weightOf(e); e.day=keyOf(t); EV.push(e); }
+});
+MI.sort(function(p,q){return p.t-q.t;});
+EV.sort(function(p,q){return p.t-q.t;});
+var BYDAY = {};
+EV.forEach(function(e,i){ e.id=i; (BYDAY[e.day]=BYDAY[e.day]||[]).push(e); });
+
+function moonSignAt(ms){
+  var lo=0, hi=MI.length-1, r=-1;
+  while(lo<=hi){ var m=(lo+hi)>>1; if(MI[m].t<=ms){ r=m; lo=m+1; } else hi=m-1; }
+  return r>=0?MI[r].sign:-1;
+}
+function posRow(key){ var i=diffDays(FIRST,key); return D.pos[i]||null; }
+function lonOf(row,b){ return (Math.floor(row[b]/10)/100)%360; }
+function retroOf(row,b){ return row[b]%10===1; }
+function dms(lon){
+  lon=((lon%360)+360)%360;
+  var s=Math.floor(lon/30), d=lon-s*30, deg=Math.floor(d), mn=Math.floor((d-deg)*60);
+  return {sign:s,deg:deg,min:mn,txt:deg+'°'+(mn<10?'0':'')+mn+'′'};
+}
+
+/* ---------- opisy ---------- */
+function G(ch,cls){ return '<span class="g'+(cls?' '+cls:'')+'">'+ch+'</span>'; }
+function moonSVG(elong,size,id){
+  var r=size/2-1, c=size/2, e=((elong%360)+360)%360, rx=Math.abs(Math.cos(e*Math.PI/180))*r;
+  var lit, w=e<180;
+  if(e<2||e>358) lit='';
+  else if(Math.abs(e-180)<2) lit='<circle cx="'+c+'" cy="'+c+'" r="'+r+'" fill="var(--phase)"/>';
+  else if(w){
+    var sw=e<90?0:1;
+    lit='<path d="M'+c+' '+(c-r)+' A'+r+' '+r+' 0 0 1 '+c+' '+(c+r)+' A'+rx+' '+r+' 0 0 '+sw+' '+c+' '+(c-r)+'Z" fill="var(--phase)"/>';
+  } else {
+    var sw2=e<270?0:1;
+    lit='<path d="M'+c+' '+(c-r)+' A'+r+' '+r+' 0 0 0 '+c+' '+(c+r)+' A'+rx+' '+r+' 0 0 '+sw2+' '+c+' '+(c-r)+'Z" fill="var(--phase)"/>';
+  }
+  return '<svg width="'+size+'" height="'+size+'" viewBox="0 0 '+size+' '+size+'" aria-hidden="true"><circle cx="'+c+'" cy="'+c+'" r="'+r+'" fill="#0b0a1f" stroke="var(--text-faint)" stroke-width="1"/>'+lit+'<circle cx="'+c+'" cy="'+c+'" r="'+r+'" fill="none" stroke="var(--phase)" stroke-opacity=".5" stroke-width=".8"/></svg>';
+}
+var PHN = ['Nów Księżyca','Pierwsza kwadra','Pełnia Księżyca','Ostatnia kwadra'];
+var ECLN = {1:'częściowe',2:'całkowite',3:'obrączkowe',4:'półcieniowe',5:'hybrydowe'};
+function aspPhrase(a,b,ang){
+  var A=ASP[ang];
+  return PL[a].n+' w '+A.loc+' '+(ang===0?'z '+PL[b].ins:'do '+PL[b].gen);
+}
+function aspText(e){
+  var a=e.a,b=e.b,ang=e.ang,t=ASP[ang].t, txt='';
+  if(a===1){
+    var set=MOONASP[b];
+    txt = t==='conj'?set.c:(t==='soft'?set.s:set.h);
+  } else if(BESPOKE[a+'-'+b+'-'+ang]){
+    txt = BESPOKE[a+'-'+b+'-'+ang];
+  } else {
+    var fa=FUN[a], fb=FUN[b];
+    if(ang===0) txt='Siły się łączą: '+fa+' spotykają się ze sferą: '+fb+'. Te dwa tematy zlewają się w jeden i wchodzą na pierwszy plan.';
+    else if(ang===120) txt='Łatwy przepływ między sferami: '+fa+' oraz '+fb+'. Sprzyja działaniom, które łączą oba obszary.';
+    else if(ang===60) txt='Pojawia się szansa na współpracę sfer: '+fa+' i '+fb+'. Warto ją aktywnie wykorzystać.';
+    else if(ang===90) txt='Napięcie między sferami: '+fa+' kontra '+fb+'. Wymaga decyzji i kompromisu, ale daje impuls do zmiany.';
+    else txt='Przeciwległe siły: '+fa+' naprzeciw '+fb+'. Szukaj równowagi; sprawy często ujawniają się w relacjach z innymi.';
+  }
+  if(e.pass) txt += ' To '+e.pass+'. z '+e.of+' dokładnych kontaktów tego aspektu (planeta zawraca w ruchu wstecznym).';
+  return txt;
+}
+function describe(e){
+  var r={cls:'',tag:'',title:'',text:'',plate:'',short:''};
+  if(e.k==='A'){
+    var A=ASP[e.ang];
+    r.cls=A.t; r.tag=A.n;
+    r.title=aspPhrase(e.a,e.b,e.ang);
+    r.text=aspText(e);
+    r.plate=G(PL[e.a].g)+G(A.g,'asp')+G(PL[e.b].g);
+    r.short=r.plate;
+    r.sub=PL[e.a].n+' '+A.n+' '+PL[e.b].n;
+  } else if(e.k==='I'){
+    var s=SG[e.sign];
+    r.cls='ingress'; r.tag='ingres';
+    r.title=PL[e.b].n+' wchodzi w znak '+s.gen;
+    if(e.b===1) r.text=MOONSIGN[e.sign];
+    else {
+      r.text='Przez najbliższy czas '+FUN[e.b]+' zyskują ton '+TONE[e.sign]+'.'+(DUR[e.b]||'');
+      if(e.retro) r.text+=' Wejście wsteczne: planeta na chwilę wraca do poprzedniego znaku.';
+    }
+    r.plate=G(PL[e.b].g)+G('→','arr')+G(s.g,s.el+'-t');
+    r.short=r.plate;
+    r.sub=PL[e.b].n+' → '+s.n;
+  } else if(e.k==='S'){
+    var d=dms(e.lon), sg=SG[d.sign];
+    r.cls='station'; r.tag='stacja';
+    r.title=PL[e.b].n+(e.retro?' rozpoczyna ruch wsteczny':' kończy ruch wsteczny');
+    var where=' w '+sg.loc+', '+d.txt+'.';
+    if(e.retro){
+      r.text=PL[e.b].n+' zatrzymuje się'+where+' Czas przeglądu i powrotów: sfera „'+FUN[e.b]+'” wymaga poprawek, a nie nowych startów.';
+      if(e.b===2) r.text+=' Sprawdzaj umowy, wiadomości i sprzęt dwa razy; łatwo o nieporozumienia.';
+    } else {
+      r.text=PL[e.b].n+' zatrzymuje się'+where+' Sfera „'+FUN[e.b]+'” znów nabiera tempa; po stacji efekty bywają wyraźne jeszcze przez kilka dni.';
+    }
+    r.plate=G(PL[e.b].g)+'<span class="mono" style="font-size:14px;color:var(--station)">'+(e.retro?'℞':'D')+'</span>';
+    r.short=G(PL[e.b].g)+'<span class="mono" style="font-size:12px">'+(e.retro?'R':'D')+'</span>';
+    r.sub=PL[e.b].n+(e.retro?' R':' D');
+  } else if(e.k==='P'){
+    var d2=dms(e.lon), sg2=SG[d2.sign];
+    r.cls='phase'; r.tag='faza';
+    var name=PHN[e.ph];
+    r.title=name+' w '+sg2.loc+' '+d2.txt;
+    var base={0:'Czas nowych zamiarów. Dobry moment, by ustalić intencje i zacząć coś od zera w sprawach znaku: '+TONE[d2.sign]+'.',
+              1:'Pora na decyzje i działanie. Pojawiają się przeszkody, które trzeba pokonać, by nowy zamiar nabrał kształtu.',
+              2:'Szczyt emocji i kulminacja tego, co zaczęło się w nowiu. Sprawy wychodzą na jaw; dobry czas na zakończenia i wdzięczność. Ton znaku: '+TONE[d2.sign]+'.',
+              3:'Czas podsumowań i odpuszczania. Porządkuj, kończ i wybaczaj; dobry moment na odpoczynek przed nowym cyklem.'}[e.ph];
+    r.text=base;
+    if(e.ecl){
+      var solar=e.ph===0;
+      r.title=(solar?'Zaćmienie Słońca':'Zaćmienie Księżyca')+' ('+ECLN[e.ecl]+') w '+sg2.loc+' '+d2.txt;
+      r.text=(solar?'Nów z zaćmieniem. ':'Pełnia z zaćmieniem. ')+(e.vis?'Zjawisko widoczne w Warszawie.':'Zjawisko niewidoczne w Warszawie.')+' Zaćmienia otwierają wątki, które rozwijają się przez kolejne miesiące. Nie podejmuj pochopnych decyzji w dniach wokół, a ton znaku to: '+TONE[d2.sign]+'.';
+      r.tag='zaćmienie';
+    }
+    var el=(e.ph*90);
+    r.plate=moonSVG(el,30)+G(sg2.g,sg2.el+'-t');
+    r.short=moonSVG(el,16);
+    r.sub=name+' '+sg2.n;
+  }
+  return r;
+}
+
+/* ---------- koło zodiaku ---------- */
+function polar(cx,cy,r,lon){ var th=(180+lon)*Math.PI/180; return [cx+r*Math.cos(th), cy-r*Math.sin(th)]; }
+function f1(x){ return x.toFixed(1); }
+function wheel(key){
+  var row=posRow(key); if(!row) return '';
+  var cx=260, cy=260, R1=246, R2=204, R3=196, RP=162, RA=118, i;
+  var out='<svg viewBox="0 0 520 520" role="img" aria-label="Koło zodiaku z położeniami planet w południe">';
+  out+='<defs><radialGradient id="wg" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#1c1946"/><stop offset="1" stop-color="#0d0c27"/></radialGradient></defs>';
+  out+='<circle cx="'+cx+'" cy="'+cy+'" r="'+R1+'" fill="url(#wg)" stroke="var(--gold-dim)" stroke-width="1.2"/>';
+  var elCol={fire:'var(--fire)',earth:'var(--earth)',air:'var(--air)',water:'var(--water)'};
+  for(i=0;i<12;i++){
+    var l1=i*30,l2=l1+30;
+    var p1=polar(cx,cy,R2,l1),p2=polar(cx,cy,R2,l2),p3=polar(cx,cy,R1,l2),p4=polar(cx,cy,R1,l1);
+    out+='<path d="M'+f1(p1[0])+' '+f1(p1[1])+' A'+R2+' '+R2+' 0 0 0 '+f1(p2[0])+' '+f1(p2[1])+' L'+f1(p3[0])+' '+f1(p3[1])+' A'+R1+' '+R1+' 0 0 1 '+f1(p4[0])+' '+f1(p4[1])+'Z" fill="'+elCol[SG[i].el]+'" fill-opacity=".10" stroke="var(--line)" stroke-width="1"/>';
+    var pg=polar(cx,cy,(R1+R2)/2,l1+15);
+    out+='<text x="'+f1(pg[0])+'" y="'+f1(pg[1])+'" text-anchor="middle" dominant-baseline="central" font-family="var(--f-glyph)" font-size="22" fill="'+elCol[SG[i].el]+'">'+SG[i].g+'</text>';
+  }
+  out+='<circle cx="'+cx+'" cy="'+cy+'" r="'+R2+'" fill="none" stroke="var(--gold-dim)" stroke-width="1"/>';
+  out+='<circle cx="'+cx+'" cy="'+cy+'" r="'+R3+'" fill="none" stroke="var(--line)" stroke-width=".8"/>';
+  for(i=0;i<360;i+=5){
+    var a=polar(cx,cy,R2,i), b=polar(cx,cy,i%30===0?R3-8:(i%10===0?R3-2:R2-4),i);
+    out+='<line x1="'+f1(a[0])+'" y1="'+f1(a[1])+'" x2="'+f1(b[0])+'" y2="'+f1(b[1])+'" stroke="var(--gold-dim)" stroke-opacity="'+(i%30===0?.9:.45)+'" stroke-width=".8"/>';
+  }
+  out+='<circle cx="'+cx+'" cy="'+cy+'" r="'+RA+'" fill="none" stroke="var(--line-soft)" stroke-width="1"/>';
+  var bodies=[],lons=[];
+  for(i=0;i<10;i++){ lons[i]=lonOf(row,i); bodies.push(i); }
+  /* aspekty */
+  var angs=[[60,4],[90,5],[120,5],[180,6]];
+  for(var p=0;p<10;p++) for(var q=p+1;q<10;q++){
+    var df=Math.abs(lons[p]-lons[q]); if(df>180) df=360-df;
+    for(var k=0;k<angs.length;k++){
+      var orb=Math.abs(df-angs[k][0]);
+      if(orb<=angs[k][1]){
+        var col=ASP[angs[k][0]].t==='hard'?'var(--hard)':'var(--soft)';
+        var u=polar(cx,cy,RA,lons[p]), v=polar(cx,cy,RA,lons[q]);
+        out+='<line x1="'+f1(u[0])+'" y1="'+f1(u[1])+'" x2="'+f1(v[0])+'" y2="'+f1(v[1])+'" stroke="'+col+'" stroke-opacity="'+(0.85-orb/angs[k][1]*0.55).toFixed(2)+'" stroke-width="'+(orb<1?2:1.2)+'"/>';
+      }
+    }
+  }
+  /* planety: rozsunięcie glifów */
+  var order=bodies.slice().sort(function(m,n){return lons[m]-lons[n];});
+  var disp={}; order.forEach(function(b){disp[b]=lons[b];});
+  var sep=9;
+  for(var it=0;it<80;it++){
+    var moved=false;
+    for(var z=0;z<order.length;z++){
+      var b1=order[z], b2=order[(z+1)%order.length];
+      var gap=disp[b2]-disp[b1]; if(gap<0) gap+=360;
+      if(gap<sep){ var push=(sep-gap)/2+0.01; disp[b1]-=push; disp[b2]+=push; moved=true; }
+    }
+    if(!moved) break;
+  }
+  order.forEach(function(b){
+    var tr1=polar(cx,cy,R3,lons[b]), tr2=polar(cx,cy,R3-12,lons[b]);
+    out+='<line x1="'+f1(tr1[0])+'" y1="'+f1(tr1[1])+'" x2="'+f1(tr2[0])+'" y2="'+f1(tr2[1])+'" stroke="var(--gold)" stroke-width="1.6"/>';
+    var gp=polar(cx,cy,RP,disp[b]), cn=polar(cx,cy,R3-12,lons[b]), cg=polar(cx,cy,RP+14,disp[b]);
+    out+='<line x1="'+f1(cn[0])+'" y1="'+f1(cn[1])+'" x2="'+f1(cg[0])+'" y2="'+f1(cg[1])+'" stroke="var(--gold)" stroke-opacity=".35" stroke-width=".8"/>';
+    var d=dms(lons[b]);
+    var col=b===1?'var(--moon)':(b===0?'var(--gold)':'var(--text)');
+    out+='<g><title>'+PL[b].n+' '+d.txt+' '+SG[d.sign].gen+(retroOf(row,b)?' (℞)':'')+'</title><circle cx="'+f1(gp[0])+'" cy="'+f1(gp[1])+'" r="13" fill="var(--ink-0)" fill-opacity=".85"/><text x="'+f1(gp[0])+'" y="'+f1(gp[1])+'" text-anchor="middle" dominant-baseline="central" font-family="var(--f-glyph)" font-size="21" fill="'+col+'">'+PL[b].g+'</text></g>';
+    if(retroOf(row,b)){
+      var rp=polar(cx,cy,RP-22,disp[b]);
+      out+='<text x="'+f1(rp[0])+'" y="'+f1(rp[1])+'" text-anchor="middle" dominant-baseline="central" font-family="var(--f-mono)" font-size="10" fill="var(--station)">R</text>';
+    }
+  });
+  /* środek: faza Księżyca */
+  var el=(lons[1]-lons[0]+360)%360;
+  out+='<g transform="translate('+(cx-24)+' '+(cy-24)+')">'+moonSVG(el,48)+'</g>';
+  out+='</svg>';
+  return out;
+}
+
+/* ---------- księżycowe pasma i sentencje dnia ---------- */
+function moonPhaseName(el){
+  var bins=['Nów','Sierp przybywający','I kwadra','Garb przybywający','Pełnia','Garb ubywający','III kwadra','Sierp ubywający'];
+  return bins[Math.floor((((el%360)+360)%360+22.5)/45)%8];
+}
+function dayModel(key){
+  var s=dayStart(key), e=dayStart(addDays(key,1));
+  var row=posRow(key);
+  var events=BYDAY[key]||[];
+  var segs=[], cur=s, sign=moonSignAt(s), ing=[];
+  MI.forEach(function(m){ if(m.t>s&&m.t<e) ing.push(m); });
+  ing.forEach(function(m){ segs.push({a:cur,b:m.t,sign:sign}); cur=m.t; sign=m.sign; });
+  segs.push({a:cur,b:e,sign:sign});
+  var vocs=VOC.filter(function(v){return v.e>s&&v.s<e;});
+  return {key:key,s:s,e:e,row:row,events:events,segs:segs,vocs:vocs};
+}
+function illum(el){ return Math.round((1-Math.cos(el*Math.PI/180))/2*100); }
+function moonEl(row){ return (lonOf(row,1)-lonOf(row,0)+360)%360; }
+
+
+/* ---------- reklamy ---------- */
+var PHONE_TXT='737 803 692', PHONE_TEL='+48737803692';
+var ADS=[
+ {g:'☽',tag:'Wróżba z tarota',h:'Zapytaj kart o to, co naprawdę Cię trapi',p:'Indywidualna wróżba z tarota w rozmowie telefonicznej. Konkretne odpowiedzi na Twoje pytanie, bez ogólników.'},
+ {g:'☉',tag:'Astrologia',h:'Co te tranzyty oznaczają w Twoim horoskopie?',p:'Kalendarz pokazuje niebo dla wszystkich. Twój horoskop urodzeniowy mówi, jak dotyka ono właśnie Ciebie. Omówię to z Tobą osobiście.'},
+ {g:'♄',tag:'Prawdziwy astrolog',h:'Porozmawiaj z człowiekiem, a nie z automatem',p:'Ten kalendarz liczy komputer, ale interpretacja to rozmowa. Astrolog Mariusz odpowie na pytania o miłość, pracę i pieniądze.'},
+ {g:'☍',tag:'Astrolog detektyw',h:'Konkretne odpowiedzi zamiast ogólników',p:'Astrolog z licencją detektywa. Łączę analizę horoskopu z dociekliwym podejściem do Twojej sprawy.'},
+ {g:'△',tag:'Termin na ważną decyzję',h:'Ślub, firma, umowa, przeprowadzka: kiedy zacząć?',p:'Dobiorę datę do Twojego horoskopu i bieżących tranzytów. To astrologia elekcyjna, czyli wybór dobrego momentu.'},
+ {g:'✶',tag:'Numerologia',h:'Liczby, które towarzyszą Ci od urodzenia',p:'Analiza numerologiczna daty urodzenia i imienia: talenty, cykle życia i wyzwania na najbliższy czas.'},
+ {g:'☉',tag:'Horoskop urodzeniowy',h:'Mapa nieba z dnia Twoich narodzin',p:'Omówienie osobowości, relacji i kariery na podstawie Twojego horoskopu. Zadzwoń i umówmy konsultację.'},
+ {g:'☽',tag:'Rytuały i ochrona',h:'Rytuały i ochrona energetyczna',p:'Porozmawiajmy, czego potrzebujesz i jak mogę pomóc. Więcej o rytuałach znajdziesz na rytualista.pl.'},
+ {g:'♃',tag:'Wróżby i astrologia',h:'Miłość, praca, pieniądze: o co zapytasz?',p:'Wróżba z kart, horoskop lub analiza numerologiczna. Wybierz to, co Ci bliskie, i zadzwoń.'},
+ {g:'✶',tag:'Konsultacja telefoniczna',h:'Zadzwoń, gdy potrzebujesz jasności',p:'Jedna rozmowa potrafi uporządkować wiele spraw. Astrolog, tarocista i numerolog w jednym miejscu.'}
+];
+var lastAds=[];
+function pickAds(n){
+  var pool=ADS.map(function(_,i){return i;}).filter(function(i){return lastAds.indexOf(i)<0;});
+  var out=[];
+  while(out.length<n&&pool.length){ out.push(pool.splice(Math.floor(Math.random()*pool.length),1)[0]); }
+  lastAds=out; return out;
+}
+function adHTML(i){
+  var a=ADS[i];
+  return '<aside class="ad" data-glyph="'+a.g+'" aria-label="Konsultacje: '+esc(a.tag)+'"><div><div class="ad-tag">'+G(a.g)+'<span>'+esc(a.tag)+'</span></div><h3>'+esc(a.h)+'</h3><p>'+esc(a.p)+'</p></div>'
+   +'<a class="ad-call" href="tel:'+PHONE_TEL+'"><span class="lbl">Zadzwoń teraz</span><span class="num">'+PHONE_TXT+'</span><span class="who">Astrolog Mariusz</span></a>'
+   +'<span class="ad-site">wrozbitamariusz.pl</span></aside>';
+}
+
+/* ---------- widok: dzień ---------- */
+var S = {view:'dzien', day:TODAY, week:null, month:null, dayAll:true, weekAll:false};
+function setHash(){
+  try{
+    var h = S.view==='dzien'?'dzien-'+S.day : S.view==='tydzien'?'tydzien-'+S.week : 'miesiac-'+S.month;
+    history.replaceState(null,'','#'+h);
+  }catch(x){}
+}
+function mondayOf(key){ return addDays(key,-dowMon(key)); }
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
+
+function renderDay(){
+  var ads=pickAds(2);
+  var m=dayModel(S.day), row=m.row;
+  var wd=cap(fWd.format(utcOf(S.day))), dm=fDM.format(utcOf(S.day)), yr=S.day.slice(0,4);
+  var h='';
+  h+='<div class="dayhead"><div><div class="wd">'+wd+'</div><h2>'+dm+'<small>'+yr+'</small></h2></div>';
+  h+='<div class="nav"><button class="btn" id="prev" aria-label="Poprzedni dzień">‹</button>';
+  h+='<input class="field" type="date" id="pick" min="'+FIRST+'" max="'+LAST+'" value="'+S.day+'" aria-label="Wybierz dzień">';
+  h+='<button class="btn" id="next" aria-label="Następny dzień">›</button>';
+  h+='<button class="btn gold" id="today">Dziś</button></div></div>';
+  /* oś 24 h */
+  var span=m.e-m.s;
+  function pct(t){ return ((t-m.s)/span*100).toFixed(3); }
+  var strip='<div class="strip"><div class="strip-bar">';
+  m.segs.forEach(function(sg){
+    var s=SG[sg.sign]; var w=(sg.b-sg.a)/span*100;
+    strip+='<div class="seg '+s.el+'" style="left:'+pct(sg.a)+'%;width:'+w.toFixed(3)+'%">'+G(s.g)+(w>12?'<span>Księżyc w '+s.loc+'</span>':'')+'</div>';
+  });
+  m.vocs.forEach(function(v){
+    var a=Math.max(v.s,m.s), b=Math.min(v.e,m.e);
+    strip+='<div class="voc" style="left:'+pct(a)+'%;width:'+((b-a)/span*100).toFixed(3)+'%">'+((b-a)/span>0.16?'bez kursu':'')+'</div>';
+  });
+  m.events.forEach(function(e){
+    var d=describe(e), minor=e.w<4;
+    strip+='<button class="dot '+d.cls+(minor?' minor':'')+'" style="left:'+pct(e.t)+'%" data-ev="'+e.id+'" title="'+tm(e.t)+' · '+esc(d.title)+'" aria-label="'+tm(e.t)+' '+esc(d.title)+'"></button>';
+  });
+  if(S.day===REALTODAY){ strip+='<div class="nowline" style="left:'+pct(Date.now())+'%"></div>'; }
+  strip+='</div><div class="hours">';
+  var hstep=window.innerWidth<720?6:3; for(var hh=0;hh<=24;hh+=hstep){ strip+='<span style="left:'+(hh/24*100)+'%">'+(hh<10?'0':'')+hh+':00</span>'; }
+  strip+='</div></div>';
+  h+=strip;
+  /* podsumowanie */
+  var sentences=[];
+  var first=m.segs[0], last=m.segs[m.segs.length-1];
+  if(m.segs.length===1) sentences.push('Księżyc przez cały dzień w znaku <b>'+SG[first.sign].gen+'</b>. '+MOONSIGN[first.sign]);
+  else sentences.push('Księżyc przechodzi ze znaku <b>'+SG[first.sign].gen+'</b> do <b>'+SG[last.sign].gen+'</b> o '+tm(last.a)+'. '+MOONSIGN[last.sign]);
+  var top=m.events.filter(function(e){return e.w>=4&&!(e.k==='I'&&e.b===1);}).sort(function(a,b){return b.w-a.w||a.t-b.t;}).slice(0,3);
+  if(top.length){
+    sentences.push('Najważniejsze na niebie: '+top.map(function(e){return '<b>'+esc(describe(e).title)+'</b> ('+tm(e.t)+')';}).join('; ')+'.');
+  } else sentences.push('Spokojny dzień bez dużych tranzytów planet. Tło tworzy głównie Księżyc.');
+  if(m.vocs.length){
+    var v0=m.vocs[0];
+    sentences.push('Księżyc bez kursu: '+m.vocs.map(function(v){ var a=Math.max(v.s,m.s), b=Math.min(v.e,m.e); return (v.s<m.s?'od wczoraj':'od '+tm(a))+' do '+(v.e>m.e?'jutra':tm(b)); }).join(' i ')+'. Odłóż ważne decyzje i nowe starty.');
+  }
+  var vis=m.events.filter(function(e){return S.dayAll||e.w>=4;});
+  var tl='';
+  var nowIns = S.day===REALTODAY;
+  var nowDone=false;
+  vis.forEach(function(e){
+    if(nowIns&&!nowDone&&e.t>Date.now()){ tl+='<li class="nowrow">teraz '+tm(Date.now())+'</li>'; nowDone=true; }
+    var d=describe(e), minor=e.w<4;
+    tl+='<li class="ev '+d.cls+(minor?' minor':'')+'" id="ev-'+e.id+'"><time>'+tm(e.t)+'</time><div class="plate">'+d.plate+'</div><div class="body"><h3>'+esc(d.title)+'<span class="tag">'+d.tag+'</span></h3><p>'+esc(d.text)+'</p></div></li>';
+  });
+  if(nowIns&&!nowDone&&vis.length){ tl+='<li class="nowrow">teraz '+tm(Date.now())+'</li>'; }
+  if(!vis.length) tl='<li class="empty">Brak zdarzeń w tym trybie. Przełącz na „Wszystko”, aby zobaczyć aspekty Księżyca.</li>';
+  /* prawa kolumna */
+  var el=moonEl(row), side='';
+  var sgNoon=SG[Math.floor(lonOf(row,1)/30)];
+  side+='<div class="panel wheelbox">'+wheel(S.day)+'<div class="legend"><span><i style="background:var(--hard)"></i>napięcie</span><span><i style="background:var(--soft)"></i>harmonia</span><span style="margin-left:auto" class="mono">12:00 · stan na południe</span></div></div>';
+  side+='<div class="panel moonCard"><div class="ph">'+moonSVG(el,64)+'</div><div class="nm">'+moonPhaseName(el)+'</div><div class="sub">oświetlenie '+illum(el)+'% · Księżyc w '+sgNoon.loc+'</div><div class="sub">'+(el<180?'przybywa':'ubywa')+'</div>';
+  if(m.vocs.length) side+='<div class="vocnote">Księżyc bez kursu w tym dniu. Z reguły przestaje „doprowadzać sprawy do końca”, więc lepiej odpocząć niż zaczynać.</div>';
+  side+='</div>';
+  var tb='<table class="pos">';
+  for(var b=0;b<11;b++){
+    var l=lonOf(row,b), d=dms(l), sg=SG[d.sign];
+    tb+='<tr><td class="pg"><span class="g">'+PL[b].g+'</span></td><td class="pn">'+PL[b].n+'</td><td class="ps"><span class="g '+sg.el+'-t">'+sg.g+'</span>'+d.txt+(b<10&&retroOf(row,b)?'<span class="rx" title="ruch wsteczny">R</span>':'')+'</td></tr>';
+  }
+  tb+='</table>';
+  side+='<div class="panel"><p class="sec-title">Położenia planet · południe</p>'+tb+'</div>';
+
+  h+='<div class="dayGrid"><div><div class="panel summary"><p class="sec-title" style="margin:0">Dzień w skrócie</p>'+sentences.map(function(s){return '<p>'+s+'</p>';}).join('')+'</div>'+adHTML(ads[0]);
+  h+='<div class="filter"><p class="sec-title" style="margin:0">Zdarzenia dnia · '+vis.length+'</p><div class="seg-switch" role="group" aria-label="Zakres zdarzeń"><button id="fAll" aria-pressed="'+S.dayAll+'">Wszystko</button><button id="fImp" aria-pressed="'+!S.dayAll+'">Tylko ważne</button></div></div>';
+  h+='<ol class="tl">'+tl+'</ol>'+adHTML(ads[1])+'</div><aside class="side">'+side+'</aside></div>';
+  app.innerHTML=h;
+  document.getElementById('prev').onclick=function(){ goDay(addDays(S.day,-1)); };
+  document.getElementById('next').onclick=function(){ goDay(addDays(S.day,1)); };
+  document.getElementById('today').onclick=function(){ goDay(TODAY); };
+  document.getElementById('pick').onchange=function(){ if(this.value) goDay(this.value); };
+  document.getElementById('fAll').onclick=function(){ S.dayAll=true; renderDay(); };
+  document.getElementById('fImp').onclick=function(){ S.dayAll=false; renderDay(); };
+  document.getElementById('prev').disabled = S.day<=FIRST;
+  document.getElementById('next').disabled = S.day>=LAST;
+  Array.prototype.forEach.call(document.querySelectorAll('.dot'),function(btn){
+    btn.onclick=function(){
+      var id=btn.getAttribute('data-ev'), el=document.getElementById('ev-'+id);
+      if(!el){ S.dayAll=true; renderDay(); el=document.getElementById('ev-'+id); }
+      if(el){ el.scrollIntoView({behavior:'smooth',block:'center'}); el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); }
+    };
+  });
+}
+function goDay(k){ if(k<FIRST) k=FIRST; if(k>LAST) k=LAST; S.day=k; S.view='dzien'; render(); window.scrollTo(0,0); }
+
+/* ---------- widok: tydzień ---------- */
+function weekLabel(mon){
+  var sun=addDays(mon,6);
+  var a=fDMs.format(utcOf(mon)), b=fDMs.format(utcOf(sun));
+  var ya=mon.slice(0,4), yb=sun.slice(0,4);
+  return a+(ya!==yb?' '+ya:'')+' – '+b+' '+yb;
+}
+function renderWeek(){
+  var ads=pickAds(2);
+  var mon=S.week, days=[], i;
+  for(i=0;i<7;i++) days.push(addDays(mon,i));
+  var firstMon=mondayOf(FIRST), lastMon=mondayOf(LAST);
+  var h='<div class="dayhead"><div><div class="wd">Tydzień '+isoWeek(mon)+'</div><h2 class="hd2" style="font-size:clamp(34px,6vw,60px)">'+weekLabel(mon)+'</h2></div>';
+  h+='<div class="nav"><button class="btn" id="prev" aria-label="Poprzedni tydzień">‹</button><select class="field" id="wsel" aria-label="Wybierz tydzień">';
+  var cur=firstMon, lastY='';
+  while(cur<=lastMon){
+    var y=cur.slice(0,4), mo=cap(fMonth.format(utcOf(addDays(cur,3))));
+    var grp=mo+' '+addDays(cur,3).slice(0,4);
+    if(grp!==lastY){ if(lastY) h+='</optgroup>'; h+='<optgroup label="'+grp+'">'; lastY=grp; }
+    h+='<option value="'+cur+'"'+(cur===mon?' selected':'')+'>'+weekLabel(cur)+'</option>';
+    cur=addDays(cur,7);
+  }
+  h+='</optgroup></select><button class="btn" id="next" aria-label="Następny tydzień">›</button><button class="btn gold" id="today">Ten tydzień</button></div></div>';
+  /* temat tygodnia */
+  var all=[]; days.forEach(function(k){ (BYDAY[k]||[]).forEach(function(e){all.push(e);}); });
+  var top=all.filter(function(e){return e.w>=5;}).sort(function(a,b){return b.w-a.w||a.t-b.t;}).slice(0,6).sort(function(a,b){return a.t-b.t;});
+  h+='<div class="panel weekTop"><p class="sec-title" style="margin:0">Temat tygodnia</p>';
+  if(top.length){
+    h+='<div class="theme-list">';
+    top.forEach(function(e){
+      var d=describe(e), k=e.day;
+      h+='<div class="theme"><div class="plate">'+d.plate+'</div><div><b>'+esc(d.title)+'</b><span class="when">'+cap(fWd.format(utcOf(k)))+' '+fDM.format(utcOf(k))+', '+tm(e.t)+'</span></div><p>'+esc(d.text)+'</p></div>';
+    });
+    h+='</div>';
+  } else h+='<p style="margin:0;color:var(--text-dim)">Tydzień bez wielkich tranzytów. Tło tworzą Księżyc i szybkie planety.</p>';
+  h+='</div>'+adHTML(ads[0]);
+  h+='<div class="filter" style="margin-bottom:12px"><p class="sec-title" style="margin:0">Dzień po dniu</p><div class="seg-switch" role="group" aria-label="Zakres zdarzeń"><button id="fAll" aria-pressed="'+S.weekAll+'">Z aspektami Księżyca</button><button id="fImp" aria-pressed="'+!S.weekAll+'">Tylko ważne</button></div></div>';
+  h+='<div class="weekGrid">';
+  days.forEach(function(k){
+    var row=posRow(k);
+    var evs=(BYDAY[k]||[]).filter(function(e){return S.weekAll||e.w>=4;});
+    var sg=row?SG[Math.floor(lonOf(row,1)/30)]:null;
+    var ph=(BYDAY[k]||[]).filter(function(e){return e.k==='P';})[0];
+    var mph=row?moonSVG(ph?ph.ph*90:moonEl(row),20):'';
+    h+='<section class="wcol'+(k===REALTODAY?' today':'')+'"><button class="whead" data-day="'+k+'"><div><span class="dn">'+WD3[dowMon(k)]+'</span><span class="dd">'+(+k.slice(8))+'</span></div><div class="mm">'+mph+(sg?G(sg.g,sg.el+'-t'):'')+'</div></button>';
+    h+='<ul class="wlist">';
+    if(!evs.length) h+='<li class="wnone">Brak ważnych zdarzeń</li>';
+    evs.forEach(function(e){
+      var d=describe(e), minor=e.w<4;
+      h+='<li><button class="wi '+d.cls+(minor?' minor':'')+'" data-day="'+k+'" data-ev="'+e.id+'"><span class="t">'+tm(e.t)+'</span><span class="l">'+d.short+'</span><span class="s">'+esc(wShort(e,d))+'</span></button></li>';
+    });
+    h+='</ul></section>';
+  });
+  h+='</div>'+adHTML(ads[1]);
+  app.innerHTML=h;
+  document.getElementById('prev').onclick=function(){ goWeek(addDays(S.week,-7)); };
+  document.getElementById('next').onclick=function(){ goWeek(addDays(S.week,7)); };
+  document.getElementById('today').onclick=function(){ goWeek(mondayOf(TODAY)); };
+  document.getElementById('wsel').onchange=function(){ goWeek(this.value); };
+  document.getElementById('fAll').onclick=function(){ S.weekAll=true; renderWeek(); };
+  document.getElementById('fImp').onclick=function(){ S.weekAll=false; renderWeek(); };
+  document.getElementById('prev').disabled = S.week<=firstMon;
+  document.getElementById('next').disabled = S.week>=lastMon;
+  Array.prototype.forEach.call(document.querySelectorAll('[data-day]'),function(b){
+    b.onclick=function(){ goDay(b.getAttribute('data-day')); };
+  });
+}
+function wShort(e,d){
+  if(e.k==='A') return ASP[e.ang].n;
+  if(e.k==='I') return e.b===1?'Księżyc w '+SG[e.sign].loc:'ingres';
+  if(e.k==='S') return e.retro?'ruch wsteczny':'ruch prosty';
+  if(e.k==='P') return e.ecl?(e.ph===0?'zaćmienie Słońca':'zaćmienie Księżyca'):PHN[e.ph];
+  return '';
+}
+function isoWeek(key){
+  var d=new Date(utcOf(key)); var day=(d.getUTCDay()+6)%7;
+  d.setUTCDate(d.getUTCDate()-day+3);
+  var fy=new Date(Date.UTC(d.getUTCFullYear(),0,4));
+  return 1+Math.round(((d-fy)/86400000-3+((fy.getUTCDay()+6)%7))/7);
+}
+function goWeek(mon){
+  var fm=mondayOf(FIRST), lm=mondayOf(LAST);
+  if(mon<fm) mon=fm; if(mon>lm) mon=lm;
+  S.week=mon; S.view='tydzien'; render(); window.scrollTo(0,0);
+}
+
+/* ---------- widok: miesiąc ---------- */
+function renderMonth(){
+  var ads=pickAds(2);
+  var ym=S.month, y=+ym.slice(0,4), mo=+ym.slice(5,7);
+  var first=ym+'-01', nextM=new Date(Date.UTC(y,mo,1)).toISOString().slice(0,10);
+  var lastDay=addDays(nextM,-1);
+  var gridStart=mondayOf(first), gridEnd=addDays(mondayOf(lastDay),6);
+  var h='<div class="dayhead"><div><div class="wd">'+y+'</div><h2 class="hd2" style="font-size:clamp(40px,8vw,76px)">'+cap(fMonth.format(utcOf(first)))+'</h2></div>';
+  h+='<div class="nav"><button class="btn" id="prev" aria-label="Poprzedni miesiąc">‹</button><select class="field" id="msel" aria-label="Wybierz miesiąc">';
+  var fm=FIRST.slice(0,7), lm=LAST.slice(0,7), c=fm;
+  while(c<=lm){
+    var cy=+c.slice(0,4), cm=+c.slice(5,7);
+    h+='<option value="'+c+'"'+(c===ym?' selected':'')+'>'+cap(fMY.format(Date.UTC(cy,cm-1,1)))+'</option>';
+    var nx=new Date(Date.UTC(cy,cm,1)); c=nx.getUTCFullYear()+'-'+String(nx.getUTCMonth()+1).padStart(2,'0');
+  }
+  h+='</select><button class="btn" id="next" aria-label="Następny miesiąc">›</button><button class="btn gold" id="today">Ten miesiąc</button></div></div>';
+  h+='<div class="monthWrap"><div class="mhead">'+['Pon','Wt','Śr','Czw','Pt','Sob','Nd'].map(function(d){return '<div>'+d+'</div>';}).join('')+'</div><div class="mgrid">';
+  var k=gridStart;
+  var big=[];
+  while(k<=gridEnd){
+    var inM=k.slice(0,7)===ym, row=posRow(k);
+    var evs=(BYDAY[k]||[]).filter(function(e){return e.w>=5;});
+    var sg=row?SG[Math.floor(lonOf(row,1)/30)]:null;
+    var chips='', dots='', n=0;
+    evs.forEach(function(e){
+      var d=describe(e);
+      if(n<3) chips+='<div class="chip '+d.cls+'">'+d.short+'</div>';
+      n++;
+      dots+='<i class="'+d.cls+'"></i>';
+    });
+    if(n>3) chips+='<div class="chip more">+'+(n-3)+' więcej</div>';
+    if(inM) evs.forEach(function(e){ big.push(e); });
+    h+='<button class="mc'+(inM?'':' out')+(k===REALTODAY?' today':'')+'" data-day="'+k+'" aria-label="'+fDM.format(utcOf(k))+'"><div class="r1"><span class="num">'+(+k.slice(8))+'</span><span class="msign">'+(sg?G(sg.g,sg.el+'-t'):'')+'</span></div><div class="chips">'+chips+'</div><div class="mdots">'+dots+'</div></button>';
+    k=addDays(k,1);
+  }
+  h+='</div></div>'+adHTML(ads[0]);
+  h+='<div class="mlist"><p class="sec-title">Najważniejsze w miesiącu · '+big.length+'</p>';
+  if(!big.length) h+='<p style="color:var(--text-dim)">Brak dużych zdarzeń w danych dla tego miesiąca.</p>';
+  big.sort(function(a,b){return a.t-b.t;}).forEach(function(e){
+    var d=describe(e), kd=e.day;
+    h+='<button class="mrow '+d.cls+'" data-day="'+kd+'"><span class="dt">'+(+kd.slice(8))+' '+fMonth.format(utcOf(kd)).slice(0,3)+' · '+tm(e.t)+'</span><span class="plate">'+d.plate+'</span><span class="txt"><b>'+esc(d.title)+'</b><p>'+esc(d.text)+'</p></span></button>';
+  });
+  h+='</div>'+adHTML(ads[1]);
+  app.innerHTML=h;
+  document.getElementById('prev').onclick=function(){ goMonth(shiftM(ym,-1)); };
+  document.getElementById('next').onclick=function(){ goMonth(shiftM(ym,1)); };
+  document.getElementById('today').onclick=function(){ goMonth(TODAY.slice(0,7)); };
+  document.getElementById('msel').onchange=function(){ goMonth(this.value); };
+  document.getElementById('prev').disabled = ym<=fm;
+  document.getElementById('next').disabled = ym>=lm;
+  Array.prototype.forEach.call(document.querySelectorAll('[data-day]'),function(b){ b.onclick=function(){ goDay(b.getAttribute('data-day')); }; });
+}
+function shiftM(ym,n){ var d=new Date(Date.UTC(+ym.slice(0,4),+ym.slice(5,7)-1+n,1)); return d.getUTCFullYear()+'-'+String(d.getUTCMonth()+1).padStart(2,'0'); }
+function goMonth(ym){
+  var fm=FIRST.slice(0,7), lm=LAST.slice(0,7);
+  if(ym<fm) ym=fm; if(ym>lm) ym=lm;
+  S.month=ym; S.view='miesiac'; render(); window.scrollTo(0,0);
+}
+
+/* ---------- start ---------- */
+var app=document.getElementById('app');
+function render(){
+  var map={dzien:'tab-dzien',tydzien:'tab-tydzien',miesiac:'tab-miesiac'};
+  Object.keys(map).forEach(function(v){ document.getElementById(map[v]).setAttribute('aria-selected', String(v===S.view)); });
+  if(S.view==='dzien') { S.week=mondayOf(S.day); S.month=S.day.slice(0,7); renderDay(); }
+  else if(S.view==='tydzien') { renderWeek(); }
+  else { renderMonth(); }
+  setHash();
+}
+Array.prototype.forEach.call(document.querySelectorAll('.tabs button'),function(b){
+  b.onclick=function(){
+    var v=b.getAttribute('data-v');
+    if(v==='dzien'){ S.view='dzien'; if(S.week){ var inWeek=S.day>=S.week&&S.day<=addDays(S.week,6); if(S.view!==v&&!inWeek) S.day=S.week; } }
+    if(v==='tydzien'){ S.week=mondayOf(S.day); }
+    if(v==='miesiac'){ S.month=S.day.slice(0,7); }
+    S.view=v; render(); window.scrollTo(0,0);
+  };
+});
+document.addEventListener('keydown',function(ev){
+  if(ev.target&&/INPUT|SELECT|TEXTAREA/.test(ev.target.tagName)) return;
+  if(ev.key!=='ArrowLeft'&&ev.key!=='ArrowRight') return;
+  var n=ev.key==='ArrowLeft'?-1:1;
+  if(S.view==='dzien') goDay(addDays(S.day,n));
+  else if(S.view==='tydzien') goWeek(addDays(S.week,7*n));
+  else goMonth(shiftM(S.month,n));
+});
+/* tło z gwiazdami */
+(function(){
+  var seed=7, r=function(){ seed=(seed*16807)%2147483647; return seed/2147483647; };
+  var s='<svg xmlns="http://www.w3.org/2000/svg" width="900" height="900">';
+  for(var i=0;i<130;i++){ var big=r()>.93; s+='<circle cx="'+(r()*900).toFixed(0)+'" cy="'+(r()*900).toFixed(0)+'" r="'+(big?1.3:0.7)+'" fill="#e8e4ff" fill-opacity="'+(big?.55:(.15+r()*.3)).toFixed(2)+'"/>'; }
+  s+='</svg>';
+  document.documentElement.style.setProperty('--stars','url("data:image/svg+xml,'+encodeURIComponent(s)+'")');
+  /* tarcza w logo */
+  var g=document.getElementById('tk'), t='';
+  for(var j=0;j<12;j++){ var a=j*30*Math.PI/180; t+='<line x1="'+(32+21*Math.cos(a)).toFixed(1)+'" y1="'+(32+21*Math.sin(a)).toFixed(1)+'" x2="'+(32+29*Math.cos(a)).toFixed(1)+'" y2="'+(32+29*Math.sin(a)).toFixed(1)+'"/>'; }
+  g.innerHTML=t;
+})();
+document.getElementById('range').textContent=FIRST+' – '+LAST;
+/* adres: #dzien-RRRR-MM-DD, #tydzien-RRRR-MM-DD, #miesiac-RRRR-MM */
+(function(){
+  var h=(location.hash||'').replace('#',''), m;
+  if((m=/^dzien(?:-(\d{4}-\d{2}-\d{2}))?$/.exec(h))){ S.view='dzien'; if(m[1]&&m[1]>=FIRST&&m[1]<=LAST) S.day=m[1]; }
+  else if((m=/^tydzien(?:-(\d{4}-\d{2}-\d{2}))?$/.exec(h))){ S.view='tydzien'; var d0=(m[1]&&m[1]>=FIRST&&m[1]<=LAST)?m[1]:TODAY; S.day=d0; S.week=mondayOf(d0); }
+  else if((m=/^miesiac(?:-(\d{4}-\d{2}))?$/.exec(h))){ S.view='miesiac'; var m0=(m[1]&&m[1]>=FIRST.slice(0,7)&&m[1]<=LAST.slice(0,7))?m[1]:TODAY.slice(0,7); S.month=m0; S.day=m0===TODAY.slice(0,7)?TODAY:m0+'-01'; }
+})();
+render();
+})();
+</script>
+</body>
+</html>
