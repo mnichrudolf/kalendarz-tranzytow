@@ -4,7 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="claude:viewport-fit-sides" content="cover">
-<title>Kalendarz Tranzytów</title>
+<title>Kalendarz Tranzytów · Astrolog Mariusz</title>
+<meta name="description" content="Codzienne tranzyty astrologiczne dla Polski (Warszawa): dzień, tydzień, miesiąc, 3 lata do przodu. Astrolog Mariusz, tel. 737 803 692.">
+<meta property="og:title" content="Kalendarz Tranzytów · Astrolog Mariusz">
+<meta property="og:description" content="Codzienne tranzyty, Księżyc bez kursu, fazy i zaćmienia. Konsultacje: 737 803 692.">
+<meta property="og:image" content="img/m3.jpg">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%2315123a' stroke='%23e3c07c' stroke-width='3'/%3E%3Ctext x='32' y='41' text-anchor='middle' font-family='Georgia,serif' font-size='26' font-weight='700' fill='%23e3c07c'%3EAM%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&family=Karla:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -55,6 +60,22 @@ button{cursor:pointer}
 .tabs button{background:none;border:0;padding:8px 14px 9px;font:500 13px/1 var(--f-body);letter-spacing:.14em;text-transform:uppercase;color:var(--text-dim);border-bottom:2px solid transparent;margin-bottom:-15px}
 .tabs button:hover{color:var(--text)}
 .tabs button[aria-selected="true"]{color:var(--gold);border-bottom-color:var(--gold)}
+
+/* pasek marki z telefonem */
+.topbar{position:sticky;top:0;z-index:30;margin:0 -16px 16px;padding:8px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;
+  background:#120f30ee;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1px solid var(--gold-dim)}
+.topbar .who{display:flex;align-items:center;gap:10px;min-width:0;text-decoration:none;color:var(--text)}
+.topbar .who img{flex:none;width:38px;height:38px;border-radius:50%;object-fit:cover;border:1.5px solid var(--gold);box-shadow:0 0 0 3px #e3c07c22}
+.topbar .who b{display:block;font:600 19px/1.05 var(--f-display);letter-spacing:.02em;color:var(--gold);white-space:nowrap}
+.topbar .who span{display:block;font:500 10.5px/1.3 var(--f-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--text-faint);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.topbar .tel{flex:none;display:flex;align-items:center;gap:10px;text-decoration:none;background:var(--gold);color:#1b1433;border-radius:999px;padding:8px 18px 8px 14px;
+  box-shadow:0 0 0 3px #e3c07c33,0 6px 18px #00000066}
+.topbar .tel:hover{background:#f0d08e}
+.topbar .tel svg{width:20px;height:20px;flex:none}
+.topbar .tel i{display:block;font:700 10.5px/1 var(--f-body);letter-spacing:.14em;text-transform:uppercase;font-style:normal}
+.topbar .tel strong{display:block;font:700 22px/1.05 var(--f-body);letter-spacing:.03em;font-variant-numeric:tabular-nums;white-space:nowrap}
+@media (max-width:560px){.topbar .who span{display:none}.topbar .who b{font-size:17px}.topbar .tel{padding:7px 14px 7px 11px}.topbar .tel strong{font-size:19px}}
+@media (max-width:470px){.topbar .who b{display:none}}
 
 /* nawigacja okresu */
 .nav{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
@@ -215,6 +236,14 @@ table.pos .rx{display:inline-block;margin-left:6px;font:500 11px/1 var(--f-mono)
 .ad{position:relative;overflow:hidden;margin:26px 0;border:1px solid var(--gold-dim);border-radius:12px;padding:22px 24px;
   background:radial-gradient(520px 220px at 100% 0%,#4a3a8a55,transparent 70%),linear-gradient(125deg,#241f55,#15123a);
   display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px 30px;align-items:center}
+.ad.ph{padding:0 24px 0 0;grid-template-columns:210px minmax(0,1fr);gap:10px 26px;align-items:start}
+.ad.ph>div:nth-child(2){padding-top:22px}
+.ad.ph .ad-call{grid-column:2;justify-self:start}
+.ad.ph .ad-site{grid-column:2;padding-bottom:20px}
+.ad .photo{grid-row:1/4;align-self:stretch;position:relative;min-height:260px}
+.ad .photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:var(--pos,50% 25%);display:block}
+.ad .photo::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent 55%,#1c1747 100%),linear-gradient(0deg,#15123a66,transparent 40%)}
+.ad .brandline{margin-top:10px;font:600 15px/1.2 var(--f-display);letter-spacing:.04em;color:var(--gold)}
 .ad::before{content:attr(data-glyph);position:absolute;right:-18px;bottom:-46px;font:400 190px/1 var(--f-glyph);color:#e3c07c14;pointer-events:none}
 .ad-tag{display:flex;align-items:center;gap:10px;font:500 11.5px/1 var(--f-mono);letter-spacing:.2em;text-transform:uppercase;color:var(--gold)}
 .ad-tag .g{font-size:20px}
@@ -229,6 +258,14 @@ table.pos .rx{display:inline-block;margin-left:6px;font:500 11px/1 var(--f-mono)
 .ad-site{grid-column:1;margin-top:2px;font:400 12.5px/1 var(--f-mono);letter-spacing:.08em;color:var(--text-faint)}
 @media (max-width:720px){
   .ad{grid-template-columns:minmax(0,1fr);padding:20px 18px}
+  .ad.ph{grid-template-columns:minmax(0,1fr);padding:0 0 18px;gap:14px}
+  .ad.ph .photo{grid-row:auto;min-height:0;height:240px}
+  .ad.ph>div:nth-child(2){padding-top:0}
+  .ad.ph .ad-call{justify-self:stretch}
+  .ad.ph .ad-site{padding-bottom:0}
+  .ad.ph .photo::after{background:linear-gradient(0deg,#1c1747 0%,transparent 55%)}
+  .ad.ph>div:not(.photo),.ad.ph .ad-call,.ad.ph .ad-site{margin-left:18px;margin-right:18px}
+  .ad.ph .ad-call{width:auto}
   .ad-call{width:100%}
   .ad::before{font-size:140px;right:-14px;bottom:-34px}
 }
@@ -273,6 +310,10 @@ footer .mono{letter-spacing:.04em}
 </head>
 <body>
 <div class="wrap">
+  <div class="topbar">
+    <a class="who" href="https://wrozbitamariusz.pl" rel="noopener"><img src="img/avatar.jpg" alt="Astrolog Mariusz" width="38" height="38"><div><b>Astrolog Mariusz</b><span>Astrologia · tarot · numerologia</span></div></a>
+    <a class="tel" href="tel:+48737803692" aria-label="Zadzwoń: 737 803 692"><svg viewBox="0 0 24 24" fill="#1b1433" aria-hidden="true"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.6a1 1 0 0 1-.25 1z"/></svg><span><i>Zadzwoń teraz</i><strong>737 803 692</strong></span></a>
+  </div>
   <header class="top">
     <div class="brand">
       <svg viewBox="0 0 64 64" aria-hidden="true"><g fill="none" stroke="#e3c07c" stroke-width="1.4"><circle cx="32" cy="32" r="29"/><circle cx="32" cy="32" r="21" stroke-opacity=".7"/><circle cx="32" cy="32" r="5"/><g id="tk" stroke-opacity=".85"></g><path d="M32 11 L35 29 L53 32 L35 35 L32 53 L29 35 L11 32 L29 29 Z" stroke-opacity=".9"/></g></svg>
@@ -675,6 +716,8 @@ var ADS=[
  {g:'♃',tag:'Wróżby i astrologia',h:'Miłość, praca, pieniądze: o co zapytasz?',p:'Wróżba z kart, horoskop lub analiza numerologiczna. Wybierz to, co Ci bliskie, i zadzwoń.'},
  {g:'✶',tag:'Konsultacja telefoniczna',h:'Zadzwoń, gdy potrzebujesz jasności',p:'Jedna rozmowa potrafi uporządkować wiele spraw. Astrolog, tarocista i numerolog w jednym miejscu.'}
 ];
+var PH=['img/m1.webp','img/m2.webp','img/m3.jpg'];
+var PHPOS=['50% 12%','50% 25%','50% 10%'];
 var lastAds=[];
 function pickAds(n){
   var pool=ADS.map(function(_,i){return i;}).filter(function(i){return lastAds.indexOf(i)<0;});
@@ -683,8 +726,8 @@ function pickAds(n){
   lastAds=out; return out;
 }
 function adHTML(i){
-  var a=ADS[i];
-  return '<aside class="ad" data-glyph="'+a.g+'" aria-label="Konsultacje: '+esc(a.tag)+'"><div><div class="ad-tag">'+G(a.g)+'<span>'+esc(a.tag)+'</span></div><h3>'+esc(a.h)+'</h3><p>'+esc(a.p)+'</p></div>'
+  var a=ADS[i], k=(a.tag.indexOf('tarot')>=0||a.tag.indexOf('Wróżb')>=0)?1:(i%2?0:2);
+  return '<aside class="ad ph" data-glyph="'+a.g+'" aria-label="Konsultacje: '+esc(a.tag)+'"><div class="photo"><img src="'+PH[k]+'" alt="Astrolog Mariusz" loading="lazy" style="--pos:'+PHPOS[k]+'"></div><div><div class="ad-tag">'+G(a.g)+'<span>'+esc(a.tag)+'</span></div><h3>'+esc(a.h)+'</h3><p>'+esc(a.p)+'</p><div class="brandline">Astrolog Mariusz · astrologia, tarot, numerologia</div></div>'
    +'<a class="ad-call" href="tel:'+PHONE_TEL+'"><span class="lbl">Zadzwoń teraz</span><span class="num">'+PHONE_TXT+'</span><span class="who">Astrolog Mariusz</span></a>'
    +'<span class="ad-site">wrozbitamariusz.pl</span></aside>';
 }
