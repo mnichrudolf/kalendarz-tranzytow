@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="claude:viewport-fit-sides" content="cover">
-<title>Kalendarz Tranzytów · Astrolog Mariusz</title>
-<meta name="description" content="Codzienne tranzyty astrologiczne dla Polski (Warszawa): dzień, tydzień, miesiąc, 3 lata do przodu. Astrolog Mariusz, tel. 737 803 692.">
-<meta property="og:title" content="Kalendarz Tranzytów · Astrolog Mariusz">
+<title>Kalendarz Tranzytów · Astrolog Mariusz Staszewski</title>
+<meta name="description" content="Codzienne tranzyty astrologiczne dla Polski (Warszawa): dzień, tydzień, miesiąc, 3 lata do przodu. Astrolog Mariusz Staszewski, tel. 737 803 692.">
+<meta property="og:title" content="Kalendarz Tranzytów · Astrolog Mariusz Staszewski">
 <meta property="og:description" content="Codzienne tranzyty, Księżyc bez kursu, fazy i zaćmienia. Konsultacje: 737 803 692.">
 <meta property="og:image" content="https://tranzytyastrologiczne.pl/img/og.jpg">
 <meta property="og:image:width" content="800">
@@ -320,7 +320,7 @@ footer .mono{letter-spacing:.04em}
 <body>
 <div class="wrap">
   <div class="topbar">
-    <a class="who" href="https://wrozbitamariusz.pl" rel="noopener"><img class="logo" src="img/logo.png" alt="Astrolog Mariusz" width="240" height="48"><img class="znak" src="img/znak.png" alt="Astrolog Mariusz" width="40" height="40"></a>
+    <a class="who" href="https://wrozbitamariusz.pl" rel="noopener"><img class="logo" src="img/logo.png" alt="Astrolog Mariusz Staszewski" width="240" height="48"><img class="znak" src="img/znak.png" alt="Astrolog Mariusz" width="40" height="40"></a>
     <a class="tel" href="tel:+48737803692" aria-label="Zadzwoń: 737 803 692"><svg viewBox="0 0 24 24" fill="#1b1433" aria-hidden="true"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.6a1 1 0 0 1-.25 1z"/></svg><span><i>Zadzwoń teraz</i><strong>737 803 692</strong></span></a>
   </div>
   <header class="top">
@@ -337,7 +337,7 @@ footer .mono{letter-spacing:.04em}
   <main id="app" aria-live="polite"></main>
   <footer>
     <div>Efemerydy: Swiss Ephemeris, obliczenia dla Warszawy. Okno danych: <span id="range" class="mono"></span>.</div>
-    <div><b>Astrolog Mariusz</b> · <span class="mono">737 803 692</span> · uranian.tv</div>
+    <div><b>Astrolog Mariusz Staszewski</b> · <span class="mono">737 803 692</span> · uranian.tv</div>
   </footer>
 </div>
 
@@ -717,7 +717,7 @@ var ADS=[
  {g:'☽',tag:'Wróżba z tarota',h:'Zapytaj kart o to, co naprawdę Cię trapi',p:'Indywidualna wróżba z tarota w rozmowie telefonicznej. Konkretne odpowiedzi na Twoje pytanie, bez ogólników.'},
  {g:'☉',tag:'Astrologia',h:'Co te tranzyty oznaczają w Twoim horoskopie?',p:'Kalendarz pokazuje niebo dla wszystkich. Twój horoskop urodzeniowy mówi, jak dotyka ono właśnie Ciebie. Omówię to z Tobą osobiście.'},
  {g:'♄',tag:'Prawdziwy astrolog',h:'Porozmawiaj z człowiekiem, a nie z automatem',p:'Ten kalendarz liczy komputer, ale interpretacja to rozmowa. Astrolog Mariusz odpowie na pytania o miłość, pracę i pieniądze.'},
- {g:'☍',tag:'Astrolog detektyw',h:'Konkretne odpowiedzi zamiast ogólników',p:'Astrolog z licencją detektywa. Łączę analizę horoskopu z dociekliwym podejściem do Twojej sprawy.'},
+ {g:'♀',tag:'Astrologia relacji',h:'Związek, rodzina, współpraca: co mówią gwiazdy?',p:'Omówię z Tobą relacje na podstawie Twojego horoskopu i bieżących tranzytów. Konkretnie i po ludzku.'},
  {g:'△',tag:'Termin na ważną decyzję',h:'Ślub, firma, umowa, przeprowadzka: kiedy zacząć?',p:'Dobiorę datę do Twojego horoskopu i bieżących tranzytów. To astrologia elekcyjna, czyli wybór dobrego momentu.'},
  {g:'✶',tag:'Numerologia',h:'Liczby, które towarzyszą Ci od urodzenia',p:'Analiza numerologiczna daty urodzenia i imienia: talenty, cykle życia i wyzwania na najbliższy czas.'},
  {g:'☉',tag:'Horoskop urodzeniowy',h:'Mapa nieba z dnia Twoich narodzin',p:'Omówienie osobowości, relacji i kariery na podstawie Twojego horoskopu. Zadzwoń i umówmy konsultację.'},
@@ -736,8 +736,8 @@ function pickAds(n){
 }
 function adHTML(i){
   var a=ADS[i], k=(a.tag.indexOf('tarot')>=0||a.tag.indexOf('Wróżb')>=0)?1:(i%2?0:2);
-  return '<aside class="ad ph" data-glyph="'+a.g+'" aria-label="Konsultacje: '+esc(a.tag)+'"><div class="photo"><img src="'+PH[k]+'" alt="Astrolog Mariusz" loading="lazy" style="--pos:'+PHPOS[k]+'"></div><div><div class="ad-tag">'+G(a.g)+'<span>'+esc(a.tag)+'</span></div><h3>'+esc(a.h)+'</h3><p>'+esc(a.p)+'</p><div class="brandline">Astrolog Mariusz · astrologia, tarot, numerologia</div></div>'
-   +'<a class="ad-call" href="tel:'+PHONE_TEL+'"><span class="lbl">Zadzwoń teraz</span><span class="num">'+PHONE_TXT+'</span><span class="who">Astrolog Mariusz</span></a>'
+  return '<aside class="ad ph" data-glyph="'+a.g+'" aria-label="Konsultacje: '+esc(a.tag)+'"><div class="photo"><img src="'+PH[k]+'" alt="Astrolog Mariusz Staszewski" loading="lazy" style="--pos:'+PHPOS[k]+'"></div><div><div class="ad-tag">'+G(a.g)+'<span>'+esc(a.tag)+'</span></div><h3>'+esc(a.h)+'</h3><p>'+esc(a.p)+'</p><div class="brandline">Astrolog Mariusz Staszewski · astrologia, tarot, numerologia</div></div>'
+   +'<a class="ad-call" href="tel:'+PHONE_TEL+'"><span class="lbl">Zadzwoń teraz</span><span class="num">'+PHONE_TXT+'</span><span class="who">Astrolog Mariusz Staszewski</span></a>'
    +'<span class="ad-site">wrozbitamariusz.pl</span></aside>';
 }
 
