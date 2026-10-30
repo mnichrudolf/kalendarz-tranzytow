@@ -1,0 +1,11 @@
+name: Usuń artykuł
+description: Usuwa artykuł z bloga.
+title: "Usuń artykuł: "
+body:
+  - type: input
+    id: adres
+    attributes:
+      label: Adres artykułu do usunięcia
+      description: "Końcówka adresu, np. fazy-ksiezyca-now-pelnia-kwadry (z adresu tranzytyastrologiczne.pl/artykuly/ADRES/)"
+    validations:
+      required: true
