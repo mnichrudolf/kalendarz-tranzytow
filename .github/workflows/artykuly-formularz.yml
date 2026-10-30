@@ -1,0 +1,56 @@
+name: Artykuły z formularza
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: odswiez
+  cancel-in-progress: false
+
+jobs:
+  artykul:
+    # tylko właściciel repozytorium może dodawać i usuwać artykuły
+    if: github.event.issue.user.login == github.repository_owner
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Zmień artykuły
+        id: art
+        env:
+          ISSUE_BODY: ${{ github.event.issue.body }}
+        run: node .github/scripts/artykul.js
+      - uses: actions/setup-python@v5
+        if: steps.art.outcome == 'success'
+        with:
+          python-version: "3.12"
+      - name: Zbuduj stronę
+        if: steps.art.outcome == 'success'
+        run: |
+          pip install pyswisseph fonttools brotli
+          python build.py
+          node build_pages.js
+      - name: Zapisz zmiany
+        if: steps.art.outcome == 'success'
+        run: |
+          git config user.name "kalendarz-bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add -A content docs
+          git diff --cached --quiet || git commit -m "Artykuły: zmiana z formularza #${{ github.event.issue.number }}"
+          git pull --rebase --autostash
+          git push
+      - name: Odpowiedz i zamknij zgłoszenie
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          [ -f /tmp/wynik.txt ] || echo "Nie udało się przetworzyć zgłoszenia." > /tmp/wynik.txt
+          gh issue comment ${{ github.event.issue.number }} --body-file /tmp/wynik.txt
+          gh issue close ${{ github.event.issue.number }}
