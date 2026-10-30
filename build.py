@@ -31,6 +31,11 @@ def main():
     html = (tpl.replace("/*__DATA__*/null", data)
                .replace("__GLYPHFONT__", b64).replace("__FONTMIME__", mime).replace("__FONTFMT__", fmt))
     os.makedirs(os.path.join(HERE, "docs"), exist_ok=True)
+    for old in ("glyphs.woff2", "glyphs.woff"):
+        p = os.path.join(HERE, "docs", old)
+        if os.path.exists(p): os.remove(p)
+    with open(os.path.join(HERE, "docs", "glyphs." + fmt), "wb") as fh:
+        fh.write(base64.b64decode(b64))
     with open(os.path.join(HERE, "docs", "index.html"), "w", encoding="utf-8") as fh:
         fh.write(html)
     # wersja fragmentu (bez doctype/html/head/body) do publikacji jako artefakt
