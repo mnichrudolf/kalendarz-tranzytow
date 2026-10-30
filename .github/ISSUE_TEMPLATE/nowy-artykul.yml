@@ -1,0 +1,40 @@
+name: Nowy artykuł (lub poprawka istniejącego)
+description: Dodaj artykuł na bloga. Ten sam adres co istniejący artykuł = poprawka tego artykułu.
+title: "Artykuł: "
+body:
+  - type: input
+    id: tytul
+    attributes:
+      label: Tytuł
+      description: Np. Pełnia Księżyca w Byku, co oznacza
+    validations:
+      required: true
+  - type: input
+    id: kategoria
+    attributes:
+      label: Kategoria
+      description: Np. Księżyc, Planety, Podstawy, Horoskop urodzeniowy, Konsultacje
+      placeholder: Astrologia
+  - type: input
+    id: opis
+    attributes:
+      label: Opis dla Google (1–2 zdania, ok. 120–155 znaków)
+    validations:
+      required: true
+  - type: textarea
+    id: tresc
+    attributes:
+      label: Treść artykułu
+      description: "Akapity oddzielaj pustą linią. Nagłówek: ## Tekst. Lista: - element. Pogrubienie: **tekst**. Link: [tekst](/adres/)."
+    validations:
+      required: true
+  - type: input
+    id: data
+    attributes:
+      label: Data publikacji (RRRR-MM-DD)
+      description: Puste = dzisiaj.
+  - type: input
+    id: adres
+    attributes:
+      label: Adres artykułu (opcjonalnie)
+      description: Puste = powstanie z tytułu. Wpisz adres istniejącego artykułu, żeby go poprawić.
