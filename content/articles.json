@@ -106,5 +106,14 @@
   "description": "Co zabrać, jakie dane podać i jakie pytania zadać, aby konsultacja astrologiczna była naprawdę pomocna.",
   "image": "",
   "body": "Dobra konsultacja astrologiczna to rozmowa, w której horoskop jest narzędziem do zrozumienia Twojej sytuacji. Kilka prostych przygotowań sprawi, że spotkanie będzie dużo bardziej wartościowe.\n\n## Dane urodzeniowe\n\nDo sporządzenia horoskopu potrzebne są trzy informacje: data, godzina i miejsce urodzenia (miejscowość). Godzina jest bardzo ważna, bo od niej zależą Ascendent i domy. Najlepiej znaleźć ją w akcie urodzenia albo w dokumentach szpitalnych. Jeśli znasz tylko przybliżoną godzinę, powiedz o tym wprost, a astrolog uwzględni to w interpretacji.\n\n## Pytania\n\nZastanów się, czego chcesz się dowiedzieć. Konsultacja jest najcenniejsza, gdy ma cel. Przykłady pytań:\n\n- Jaki jest mój potencjał zawodowy i kiedy sprzyja zmiana pracy?\n- Co mówi horoskop o moich relacjach i partnerstwie?\n- Jakie tranzyty wchodzą w najbliższych miesiącach i na co się przygotować?\n- Kiedy wybrać dobry termin na ważne wydarzenie, takie jak ślub, przeprowadzka lub start firmy?\n- Jak lepiej rozumieć siebie, swoje emocje i potrzeby?\n\n## Rodzaje analiz\n\nNajczęściej omawia się horoskop urodzeniowy (osobowość, talenty, wyzwania), prognozę na kolejne miesiące (tranzyty i progresje) oraz porównanie horoskopów dwóch osób (synastria). Osobną kategorią jest wybór korzystnego terminu, czyli astrologia elekcyjna.\n\n## Czego oczekiwać\n\nAstrologia to narzędzie refleksji i planowania. Nie przewiduje wyroków i nie zastępuje porady lekarza, prawnika czy doradcy finansowego. Dobra konsultacja pomaga zrozumieć klimat czasu i wybrać moment działania, ale decyzje zawsze zostają po Twojej stronie.\n\n## Jak się umówić\n\nKonsultacje z Astrologiem Mariuszem Staszewskim odbywają się telefonicznie. Zadzwoń pod numer [737 803 692](tel:+48737803692), a wspólnie ustalicie zakres i termin rozmowy. Przed spotkaniem warto też zajrzeć do [kalendarza tranzytów](/) i przejrzeć artykuły, na przykład o [Księżycu bez kursu](/artykuly/ksiezyc-bez-kursu-co-to-jest/) lub [retrogradacji Merkurego](/artykuly/retrogradacja-merkurego-fakty-i-mity/), bo ułatwią rozmowę."
+ },
+ {
+  "slug": "test-formularza",
+  "title": "Test formularza",
+  "date": "2026-10-30",
+  "category": "Test",
+  "description": "Artykul testowy sprawdzajacy dzialanie formularza, zostanie od razu usuniety.",
+  "image": "",
+  "body": "To jest artykul testowy, ktory sprawdza czy formularz na GitHubie poprawnie dodaje artykuly na strone. Zaraz zostanie usuniety."
  }
 ]
