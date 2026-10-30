@@ -6,43 +6,8 @@
 <title>Panel artykułów · Astrolog Mariusz Staszewski</title>
 <meta name="robots" content="noindex,nofollow">
 <link rel="icon" type="image/png" sizes="32x32" href="/img/favicon-32.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&family=Karla:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/site.css">
-<style>
-.panel{max-width:980px;margin:0 auto}
-.panel label{display:block;font:600 12px/1.3 var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--text-faint);margin:16px 0 6px}
-.panel input[type=text],.panel input[type=password],.panel input[type=date],.panel textarea,.panel select{width:100%;background:var(--ink-1);border:1px solid var(--line);border-radius:8px;color:var(--text);padding:10px 12px;font:400 16px/1.5 var(--f-body)}
-.panel textarea{min-height:360px;resize:vertical;font:400 15.5px/1.6 var(--f-mono)}
-.panel input:focus,.panel textarea:focus,.panel select:focus{outline:2px solid var(--gold);outline-offset:1px}
-.row2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-@media (max-width:640px){.row2{grid-template-columns:1fr}}
-.hint{font-size:13px;color:var(--text-faint);margin-top:4px}
-.hint.warn{color:var(--hard)}
-.bar{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 6px}
-.tb{background:var(--ink-2);border:1px solid var(--line);border-radius:6px;color:var(--text);min-height:36px;padding:0 12px;font:600 14px/1 var(--f-body);cursor:pointer}
-.tb:hover{border-color:var(--gold-dim);background:var(--ink-3)}
-button.pbtn{cursor:pointer;font-family:var(--f-body)}
-button.pbtn.danger{border-color:#7a3a3a;color:var(--hard)}
-button.pbtn:disabled{opacity:.45;cursor:not-allowed}
-.list{display:grid;gap:10px;margin-top:12px}
-.item{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;justify-content:space-between;background:var(--ink-2);border:1px solid var(--line);border-radius:10px;padding:12px 16px}
-.item b{font:600 18px/1.25 var(--f-display)}.item small{display:block;color:var(--text-faint);font:500 12px/1.4 var(--f-mono);letter-spacing:.06em;margin-top:2px}
-.item .act{display:flex;gap:8px;flex-wrap:wrap}
-.msg{position:sticky;top:78px;z-index:20;margin:14px 0;padding:12px 16px;border-radius:10px;border:1px solid var(--line);background:var(--ink-2)}
-.msg.ok{border-color:var(--soft);color:var(--soft)}.msg.err{border-color:var(--hard);color:var(--hard)}
-.prev{background:var(--ink-1);border:1px solid var(--line);border-radius:10px;padding:8px 22px;margin-top:8px}
-.prev p,.prev li{font-size:16.5px;line-height:1.7;color:#d9d4ee}.prev blockquote{border-left:3px solid var(--gold);margin:1em 0;padding:4px 16px;color:var(--text-dim)}
-.imgprev{max-width:320px;border-radius:10px;border:1px solid var(--line);margin-top:8px;display:block}
-details.help{background:var(--ink-2);border:1px solid var(--line);border-radius:10px;padding:10px 16px;margin-top:10px}
-details.help summary{cursor:pointer;color:var(--gold);font-weight:600}
-details.help ol{padding-left:20px;color:var(--text-dim);line-height:1.7}
-.hidden{display:none!important}
-.tabsw{display:flex;gap:6px;margin-top:12px}
-.tabsw button{background:none;border:0;border-bottom:2px solid transparent;color:var(--text-dim);padding:8px 14px;font:600 13px/1 var(--f-body);letter-spacing:.1em;text-transform:uppercase;cursor:pointer}
-.tabsw button.on{color:var(--gold);border-bottom-color:var(--gold)}
-</style>
 </head>
 <body>
 <div class="wrap">
@@ -50,222 +15,19 @@ details.help ol{padding-left:20px;color:var(--text-dim);line-height:1.7}
   <a class="who" href="/"><img class="znak" style="display:block" src="/img/znak.png" alt="Astrolog Mariusz" width="40" height="40"><b>Panel artykułów</b></a>
   <nav class="mnav"><a href="/">Kalendarz</a><a href="/artykuly/">Artykuły</a></nav>
 </div>
-<main class="page panel">
+<main class="page">
 <h1>Panel artykułów</h1>
-<p class="lead">Dodawaj, edytuj i usuwaj artykuły bloga. Po zapisaniu strona przebuduje się sama w ciągu 2–3 minut (lista po 12 na stronę i sitemap aktualizują się automatycznie).</p>
-
-<div id="msg" class="msg hidden" role="status"></div>
-
-<section id="login" class="box">
-  <h2 style="margin-top:0">Połącz z GitHubem</h2>
-  <p style="color:var(--text-dim)">Panel zapisuje artykuły w repozytorium strony. Potrzebuje do tego Twojego klucza dostępu (token). Klucz jest zapisywany tylko w tej przeglądarce i trafia wyłącznie do GitHuba.</p>
-  <label for="tok">Klucz dostępu GitHub</label>
-  <input type="password" id="tok" autocomplete="off" placeholder="github_pat_...">
-  <div class="pnav"><button class="pbtn gold" id="btnLogin" type="button">Połącz</button></div>
-  <details class="help"><summary>Jak wygenerować klucz (jednorazowo, 2 minuty)</summary>
-  <ol>
-    <li>Zaloguj się na GitHub i wejdź w <a href="https://github.com/settings/personal-access-tokens/new" rel="noopener" target="_blank">Settings → Developer settings → Fine-grained tokens → Generate new token</a>.</li>
-    <li>Nazwa: <b>panel-artykulow</b>. Wygaśnięcie (Expiration): najdłuższe możliwe.</li>
-    <li>Repository access: <b>Only select repositories</b> i wybierz <b>kalendarz-tranzytow</b>.</li>
-    <li>Permissions → Repository permissions → <b>Contents: Read and write</b>. Pozostałe zostaw bez zmian.</li>
-    <li>Kliknij Generate token i skopiuj klucz (pokaże się tylko raz). Wklej go powyżej.</li>
-  </ol></details>
-</section>
-
-<section id="app" class="hidden">
-  <div class="pnav" style="justify-content:space-between;align-items:center">
-    <span class="meta" id="who" style="margin:0"></span>
-    <span style="display:flex;gap:8px;flex-wrap:wrap"><button class="pbtn gold" id="btnNew" type="button">+ Nowy artykuł</button><button class="pbtn" id="btnOut" type="button">Wyloguj</button></span>
-  </div>
-
-  <div id="viewList">
-    <h2>Artykuły <span id="cnt" class="mono" style="font-size:16px;color:var(--text-faint)"></span></h2>
-    <div class="list" id="list"></div>
-    <p class="hint" id="pagehint"></p>
-  </div>
-
-  <div id="viewEdit" class="hidden">
-    <h2 id="edTitle">Nowy artykuł</h2>
-    <label for="fTitle">Tytuł</label><input type="text" id="fTitle" maxlength="120">
-    <div class="row2">
-      <div><label for="fSlug">Adres (slug)</label><input type="text" id="fSlug" maxlength="90"><div class="hint" id="slugHint">Powstaje z tytułu. Wpisze się w adres /artykuly/<span id="slugShow"></span>/</div></div>
-      <div><label for="fDate">Data publikacji</label><input type="date" id="fDate"></div>
-    </div>
-    <div class="row2">
-      <div><label for="fCat">Kategoria</label><input type="text" id="fCat" list="cats" maxlength="40" placeholder="np. Księżyc"><datalist id="cats"><option>Podstawy</option><option>Planety</option><option>Księżyc</option><option>Horoskop urodzeniowy</option><option>Konsultacje</option></datalist></div>
-      <div><label for="fImgFile">Zdjęcie główne (opcjonalnie)</label><input type="file" id="fImgFile" accept="image/*" style="width:100%;color:var(--text-dim)"><div class="hint">Zmniejszy się automatycznie do 1200 px szerokości.</div></div>
-    </div>
-    <img id="imgPrev" class="imgprev hidden" alt="">
-    <input type="text" id="fImg" class="hidden">
-    <button class="pbtn hidden" id="btnRmImg" type="button" style="margin-top:8px">Usuń zdjęcie</button>
-    <label for="fDesc">Opis (do Google i podglądów)</label><textarea id="fDesc" style="min-height:76px;font:400 16px/1.5 var(--f-body)" maxlength="260"></textarea>
-    <div class="hint" id="descHint">Najlepiej 120–155 znaków.</div>
-    <label for="fBody">Treść</label>
-    <div class="bar">
-      <button class="tb" type="button" data-f="## ">Nagłówek</button>
-      <button class="tb" type="button" data-f="### ">Podnagłówek</button>
-      <button class="tb" type="button" data-w="**">Pogrubienie</button>
-      <button class="tb" type="button" data-w="*">Kursywa</button>
-      <button class="tb" type="button" data-f="- ">Lista</button>
-      <button class="tb" type="button" data-f="> ">Cytat</button>
-      <button class="tb" type="button" id="tbLink">Link</button>
-    </div>
-    <textarea id="fBody" placeholder="Pisz zwykłym tekstem. Akapity oddzielaj pustą linią."></textarea>
-    <div class="hint">Akapity oddziela pusta linia. Nagłówek: ## Tekst. Lista: - element. Pogrubienie: **tekst**. Link: [tekst](/adres/).</div>
-    <div class="tabsw"><button type="button" class="on" id="tabPrev">Podgląd</button></div>
-    <div class="prev" id="prev"></div>
-    <div class="pnav" style="margin-top:22px">
-      <button class="pbtn gold" id="btnSave" type="button">Opublikuj</button>
-      <button class="pbtn" id="btnCancel" type="button">Anuluj</button>
-    </div>
-  </div>
-</section>
+<p class="lead">Dodawanie i usuwanie artykułów na blogu. Zalogujesz się zwykłym loginem i hasłem do GitHuba.</p>
+<div class="pnav" style="margin-top:24px">
+  <a class="pbtn gold" href="https://github.com/mnichrudolf/kalendarz-tranzytow/issues/new?template=nowy-artykul.yml">+ Nowy artykuł</a>
+  <a class="pbtn" href="https://github.com/mnichrudolf/kalendarz-tranzytow/issues/new?template=usun-artykul.yml">Usuń artykuł</a>
+</div>
+<div class="box">
+  <h2 style="margin-top:0">Jak to działa</h2>
+  <p>Kliknij przycisk, zaloguj się na GitHubie, wypełnij pola i kliknij zielony przycisk „Create”. Po 2–3 minutach strona sama się przebuduje, a artykuł pojawi się na blogu, w stopce i w sitemapie. Gdy wpiszesz adres istniejącego artykułu, zostanie on poprawiony.</p>
+  <p>Treść: akapity oddzielaj pustą linią. Nagłówek: ## Tekst. Lista: - element. Pogrubienie: **tekst**. Link: [tekst](/adres/).</p>
+</div>
 </main>
 </div>
-<script>
-(function(){
-'use strict';
-var OWNER='mnichrudolf', REPO='kalendarz-tranzytow', BRANCH='main', FILE='content/articles.json', API='https://api.github.com';
-var PER=12, $=function(id){return document.getElementById(id);};
-var token='', arts=[], sha='', editing=null, imgData=null;
-
-function store(k,v){ try{ if(v===undefined) return localStorage.getItem(k); if(v===null) localStorage.removeItem(k); else localStorage.setItem(k,v);}catch(e){return null;} }
-function show(t,kind){ var m=$('msg'); m.className='msg '+(kind||''); m.textContent=t; m.classList.remove('hidden'); if(kind==='ok') setTimeout(function(){ m.classList.add('hidden'); },9000); }
-function hideMsg(){ $('msg').classList.add('hidden'); }
-
-/* GitHub API */
-function gh(path,opt){
-  opt=opt||{}; opt.headers=Object.assign({'Accept':'application/vnd.github+json','Authorization':'Bearer '+token,'X-GitHub-Api-Version':'2022-11-28'},opt.headers||{});
-  return fetch(API+path,opt).then(function(r){ return r.text().then(function(t){ var j=null; try{j=JSON.parse(t);}catch(e){} if(!r.ok){ var e=new Error((j&&j.message)||('HTTP '+r.status)); e.status=r.status; throw e; } return j; }); });
-}
-function b64enc(str){ var b=new TextEncoder().encode(str), s=''; for(var i=0;i<b.length;i+=0x8000) s+=String.fromCharCode.apply(null,b.subarray(i,i+0x8000)); return btoa(s); }
-function b64dec(b64){ var bin=atob(b64.replace(/\s/g,'')), a=new Uint8Array(bin.length); for(var i=0;i<bin.length;i++) a[i]=bin.charCodeAt(i); return new TextDecoder().decode(a); }
-
-function load(){
-  return gh('/repos/'+OWNER+'/'+REPO+'/contents/'+FILE+'?ref='+BRANCH+'&t='+Date.now()).then(function(j){
-    if(j.content){ return {sha:j.sha,text:b64dec(j.content)}; }
-    return gh('/repos/'+OWNER+'/'+REPO+'/git/blobs/'+j.sha).then(function(b){ return {sha:j.sha,text:b64dec(b.content)}; });
-  }).then(function(o){ sha=o.sha; arts=JSON.parse(o.text||'[]'); }).catch(function(e){
-    if(e.status===404){ sha=''; arts=[]; return; } throw e;
-  });
-}
-function saveAll(msg){
-  var body={message:msg,content:b64enc(JSON.stringify(arts,null,1)+'\n'),branch:BRANCH}; if(sha) body.sha=sha;
-  return gh('/repos/'+OWNER+'/'+REPO+'/contents/'+FILE,{method:'PUT',body:JSON.stringify(body)}).then(function(j){ sha=j.content.sha; });
-}
-function putImage(name,dataUrl){
-  var content=dataUrl.split(',')[1];
-  return gh('/repos/'+OWNER+'/'+REPO+'/contents/docs/img/blog/'+name,{method:'PUT',body:JSON.stringify({message:'Zdjęcie do artykułu: '+name,content:content,branch:BRANCH})}).then(function(){ return '/img/blog/'+name; });
-}
-
-/* markdown (taki sam jak w generatorze) */
-function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-function mdInline(s){ s=esc(s); s=s.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>'); s=s.replace(/(^|[^*])\*(?!\s)(.+?)\*(?!\*)/g,'$1<em>$2</em>'); s=s.replace(/\[([^\]]+)\]\(((?:https?:\/\/|\/)[^)\s]*)\)/g,function(m,t,u){return '<a href="'+u+'">'+t+'</a>';}); return s; }
-function md(src){ var bl=String(src||'').replace(/\r/g,'').split(/\n{2,}/), out=[]; bl.forEach(function(b){ b=b.trim(); if(!b) return;
-  if(/^### /.test(b)) out.push('<h3>'+mdInline(b.slice(4))+'</h3>');
-  else if(/^## /.test(b)) out.push('<h2>'+mdInline(b.slice(3))+'</h2>');
-  else if(/^(- |\* )/.test(b)) out.push('<ul>'+b.split('\n').filter(function(l){return l.trim();}).map(function(l){return '<li>'+mdInline(l.replace(/^(- |\* )/,''))+'</li>';}).join('')+'</ul>');
-  else if(/^\d+\. /.test(b)) out.push('<ol>'+b.split('\n').filter(function(l){return l.trim();}).map(function(l){return '<li>'+mdInline(l.replace(/^\d+\. /,''))+'</li>';}).join('')+'</ol>');
-  else if(/^> /.test(b)) out.push('<blockquote>'+mdInline(b.replace(/^> ?/gm,'').replace(/\n/g,' '))+'</blockquote>');
-  else out.push('<p>'+mdInline(b.replace(/\n/g,' '))+'</p>'); }); return out.join('\n'); }
-
-function slugify(t){
-  var m={'ą':'a','ć':'c','ę':'e','ł':'l','ń':'n','ó':'o','ś':'s','ź':'z','ż':'z'};
-  return String(t).toLowerCase().replace(/[ąćęłńóśźż]/g,function(c){return m[c];}).replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,80);
-}
-var DF=new Intl.DateTimeFormat('pl-PL',{timeZone:'UTC',day:'numeric',month:'long',year:'numeric'});
-function today(){ return new Date().toLocaleDateString('en-CA',{timeZone:'Europe/Warsaw'}); }
-
-/* lista */
-function renderList(){
-  arts.sort(function(a,b){ return (b.date||'').localeCompare(a.date||''); });
-  $('cnt').textContent='('+arts.length+')';
-  var pages=Math.max(1,Math.ceil(arts.length/PER));
-  $('pagehint').textContent='Na blogu: '+pages+' '+(pages===1?'strona':(pages<5?'strony':'stron'))+' po '+PER+' artykułów.';
-  var h='';
-  arts.forEach(function(a,i){
-    h+='<div class="item"><div><b>'+esc(a.title)+'</b><small>'+esc(a.category||'')+' · '+esc(a.date?DF.format(Date.parse(a.date+'T00:00:00Z')):'')+' · /artykuly/'+esc(a.slug)+'/</small></div>'+
-       '<div class="act"><a class="pbtn" href="/artykuly/'+esc(a.slug)+'/" target="_blank" rel="noopener">Zobacz</a><button class="pbtn" data-edit="'+i+'" type="button">Edytuj</button><button class="pbtn danger" data-del="'+i+'" type="button">Usuń</button></div></div>';
-  });
-  $('list').innerHTML=h||'<p style="color:var(--text-dim)">Brak artykułów. Dodaj pierwszy przyciskiem „Nowy artykuł”.</p>';
-}
-function showList(){ $('viewEdit').classList.add('hidden'); $('viewList').classList.remove('hidden'); renderList(); window.scrollTo(0,0); }
-
-/* edytor */
-function openEditor(i){
-  editing=(i===null||i===undefined)?null:i; var a=editing===null?{}:arts[editing]; imgData=null;
-  $('edTitle').textContent=editing===null?'Nowy artykuł':'Edycja artykułu';
-  $('fTitle').value=a.title||''; $('fSlug').value=a.slug||''; $('fSlug').dataset.auto=a.slug?'0':'1';
-  $('fDate').value=a.date||today(); $('fCat').value=a.category||''; $('fDesc').value=a.description||''; $('fBody').value=a.body||''; $('fImg').value=a.image||'';
-  $('fImgFile').value=''; syncImg(); syncHints(); $('slugShow').textContent=$('fSlug').value;
-  $('viewList').classList.add('hidden'); $('viewEdit').classList.remove('hidden'); window.scrollTo(0,0);
-}
-function syncImg(){ var src=imgData||$('fImg').value; var im=$('imgPrev'); if(src){ im.src=src; im.classList.remove('hidden'); $('btnRmImg').classList.remove('hidden'); } else { im.removeAttribute('src'); im.classList.add('hidden'); $('btnRmImg').classList.add('hidden'); } }
-function syncHints(){ var n=$('fDesc').value.length, h=$('descHint'); h.textContent=n+' znaków. Najlepiej 120–155.'; h.className='hint'+(n>160?' warn':''); $('prev').innerHTML=md($('fBody').value)||'<p style="color:var(--text-faint)">Podgląd treści pojawi się tutaj.</p>'; }
-function wrap(ta,l,r){ var s=ta.selectionStart,e=ta.selectionEnd,v=ta.value; ta.value=v.slice(0,s)+l+v.slice(s,e)+r+v.slice(e); ta.focus(); ta.selectionStart=s+l.length; ta.selectionEnd=e+l.length; syncHints(); }
-function prefix(ta,p){ var s=ta.selectionStart,v=ta.value, ls=v.lastIndexOf('\n',s-1)+1; ta.value=v.slice(0,ls)+p+v.slice(ls); ta.focus(); ta.selectionStart=ta.selectionEnd=s+p.length; syncHints(); }
-
-function resizeImage(file){
-  return new Promise(function(res,rej){ var fr=new FileReader(); fr.onload=function(){ var im=new Image(); im.onload=function(){ var w=im.width,h=im.height,max=1200; if(w>max){ h=Math.round(h*max/w); w=max; } var c=document.createElement('canvas'); c.width=w; c.height=h; var x=c.getContext('2d'); x.fillStyle='#fff'; x.fillRect(0,0,w,h); x.drawImage(im,0,0,w,h); res(c.toDataURL('image/jpeg',0.86)); }; im.onerror=rej; im.src=fr.result; }; fr.onerror=rej; fr.readAsDataURL(file); });
-}
-
-function publish(){
-  var title=$('fTitle').value.trim(), slug=slugify($('fSlug').value||title), date=$('fDate').value, body=$('fBody').value.trim();
-  if(!title){ show('Wpisz tytuł.','err'); return; } if(!slug){ show('Adres (slug) jest pusty.','err'); return; } if(!date){ show('Wybierz datę.','err'); return; } if(body.length<80){ show('Treść jest za krótka.','err'); return; }
-  var dup=arts.some(function(a,i){ return a.slug===slug && i!==editing; }); if(dup){ show('Artykuł o takim adresie już istnieje. Zmień adres.','err'); return; }
-  $('btnSave').disabled=true; show('Zapisuję…');
-  var rec={slug:slug,title:title,date:date,category:$('fCat').value.trim()||'Astrologia',description:$('fDesc').value.trim(),image:$('fImg').value.trim(),body:body};
-  if(editing!==null) rec.updated=today();
-  var step=imgData?putImage(slug+'-'+Date.now().toString(36)+'.jpg',imgData).then(function(u){ rec.image=u; }):Promise.resolve();
-  step.then(function(){ return load(); }).then(function(){
-    /* po odświeżeniu listy znajdź edytowany wpis po starym slugu */
-    var old=editing!==null?editing_slug:null; var idx=old?arts.findIndex(function(a){return a.slug===old;}):-1;
-    if(idx>=0){ rec.updated=rec.updated||today(); arts[idx]=rec; } else arts.push(rec);
-    return saveAll((idx>=0?'Edycja artykułu: ':'Nowy artykuł: ')+title);
-  }).then(function(){ imgData=null; show('Zapisano. Strona przebuduje się za około 2–3 minuty, potem artykuł będzie widoczny na blogu i w sitemap.','ok'); showList(); })
-  .catch(function(e){ show('Nie udało się zapisać: '+e.message+(e.status===409?' (ktoś zmienił plik, spróbuj jeszcze raz)':''),'err'); })
-  .then(function(){ $('btnSave').disabled=false; });
-}
-var editing_slug=null;
-
-function remove(i){
-  var a=arts[i]; if(!a) return;
-  if(!confirm('Usunąć artykuł „'+a.title+'”? Zniknie ze strony po przebudowie (2–3 minuty).')) return;
-  show('Usuwam…'); var slug=a.slug;
-  load().then(function(){ arts=arts.filter(function(x){return x.slug!==slug;}); return saveAll('Usunięty artykuł: '+a.title); })
-  .then(function(){ show('Usunięto. Strona przebuduje się za około 2–3 minuty.','ok'); renderList(); })
-  .catch(function(e){ show('Nie udało się usunąć: '+e.message,'err'); });
-}
-
-/* logowanie */
-function connect(t){
-  token=t.trim(); if(!token){ show('Wklej klucz dostępu.','err'); return Promise.resolve(); }
-  show('Łączę z GitHubem…');
-  return gh('/repos/'+OWNER+'/'+REPO).then(function(r){
-    if(r.permissions && !r.permissions.push) throw new Error('Ten klucz nie ma prawa zapisu do repozytorium (Contents: Read and write).');
-    store('gh_token',token); return load();
-  }).then(function(){ hideMsg(); $('login').classList.add('hidden'); $('app').classList.remove('hidden'); $('who').textContent=OWNER+'/'+REPO; showList(); })
-  .catch(function(e){ token=''; store('gh_token',null); show(e.status===401?'Klucz jest nieprawidłowy lub wygasł.':'Nie udało się połączyć: '+e.message,'err'); });
-}
-
-$('btnLogin').onclick=function(){ connect($('tok').value); };
-$('tok').addEventListener('keydown',function(e){ if(e.key==='Enter') connect($('tok').value); });
-$('btnOut').onclick=function(){ store('gh_token',null); token=''; $('app').classList.add('hidden'); $('login').classList.remove('hidden'); $('tok').value=''; };
-$('btnNew').onclick=function(){ editing_slug=null; openEditor(null); };
-$('btnCancel').onclick=showList;
-$('btnSave').onclick=publish;
-$('list').addEventListener('click',function(e){ var b=e.target.closest('button'); if(!b) return; if(b.dataset.edit!==undefined){ var i=+b.dataset.edit; editing_slug=arts[i].slug; openEditor(i); } else if(b.dataset.del!==undefined){ remove(+b.dataset.del); } });
-$('fTitle').addEventListener('input',function(){ var s=$('fSlug'); if(s.dataset.auto==='1'){ s.value=slugify($('fTitle').value); } $('slugShow').textContent=s.value; });
-$('fSlug').addEventListener('input',function(){ this.dataset.auto='0'; $('slugShow').textContent=this.value; });
-$('fDesc').addEventListener('input',syncHints); $('fBody').addEventListener('input',syncHints);
-$('fImgFile').addEventListener('change',function(){ var f=this.files[0]; if(!f) return; resizeImage(f).then(function(d){ imgData=d; syncImg(); }).catch(function(){ show('Nie udało się wczytać zdjęcia.','err'); }); });
-$('btnRmImg').onclick=function(){ imgData=null; $('fImg').value=''; $('fImgFile').value=''; syncImg(); };
-document.querySelectorAll('.tb[data-f]').forEach(function(b){ b.onclick=function(){ prefix($('fBody'),b.dataset.f); }; });
-document.querySelectorAll('.tb[data-w]').forEach(function(b){ b.onclick=function(){ wrap($('fBody'),b.dataset.w,b.dataset.w); }; });
-$('tbLink').onclick=function(){ var ta=$('fBody'); wrap(ta,'[',']('+'/adres/'+')'); };
-
-var saved=store('gh_token'); if(saved){ $('tok').value=''; connect(saved); }
-})();
-</script>
 </body>
 </html>
