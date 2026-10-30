@@ -97,6 +97,7 @@ function page(o) {
   const ld = [].concat(o.ld || []).map(x => '<script type="application/ld+json">' + JSON.stringify(Object.assign({ '@context': 'https://schema.org' }, x)).replace(/</g, '\\u003c') + '</script>').join('\n');
   const og = o.image ? (o.image.startsWith('http') ? o.image : SITE + o.image) : SITE + '/img/og.jpg';
   return '<!doctype html>\n<html lang="pl">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1">\n' +
+    '<meta name="google-site-verification" content="9H5cL2zdXOKREfRfZo7PMfEDelij77p_NsXf7IFCtA8" />\n' +
     '<title>' + esc(o.title) + '</title>\n<meta name="description" content="' + esc(o.desc) + '">\n' +
     '<link rel="canonical" href="' + url + '">\n<meta name="robots" content="' + (o.noindex ? 'noindex,follow' : 'index,follow,max-image-preview:large') + '">\n' +
     (o.prev ? '<link rel="prev" href="' + SITE + o.prev + '">\n' : '') + (o.next ? '<link rel="next" href="' + SITE + o.next + '">\n' : '') +
