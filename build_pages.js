@@ -70,14 +70,13 @@ const articles = (() => {
   try { return JSON.parse(fs.readFileSync(path.join(ROOT, 'content', 'articles.json'), 'utf8')); } catch (e) { return []; }
 })().filter(a => a && a.slug && a.title).sort((p, q) => (q.date || '').localeCompare(p.date || ''));
 
-function seoLinks() {
-  const today = (() => { const k = D.generated; return k < FIRST ? FIRST : (k > LAST ? LAST : k); })();
+function seoLinks(rolling) {
+  const today = (() => { const k = new Date().toLocaleDateString('en-CA', { timeZone: 'Europe/Warsaw' }); return k < FIRST ? FIRST : (k > LAST ? LAST : k); })();
   const days = []; for (let i = 0; i < 7; i++) { const k = addDays(today, i); if (k <= LAST) days.push(k); }
   const m0 = today.slice(0, 7), m1 = (() => { const d = new Date(utcOf(m0 + '-01')); d.setUTCMonth(d.getUTCMonth() + 1); return d.toISOString().slice(0, 7); })();
   const L = [];
   L.push('<h2 class="fpol">Tranzyty na <em>najbliższe dni</em></h2><nav class="seol" aria-label="Tranzyty na najbliższe dni">' +
-    days.map(k => '<a href="' + urlDay(k) + '">' + esc(dayShort(k)) + '</a>').join('') +
-    '<a href="' + urlWeek(mondayOf(today)) + '">Cały tydzień</a><a href="' + urlMonth(m0) + '">' + esc(cap(fMY.format(utcOf(m0 + '-01')))) + '</a>' +
+    (rolling ? days.map(k => '<a href="' + urlDay(k) + '">' + esc(dayShort(k)) + '</a>').join('') + '<a href="' + urlWeek(mondayOf(today)) + '">Cały tydzień</a>' : '') + '<a href="' + urlMonth(m0) + '">' + esc(cap(fMY.format(utcOf(m0 + '-01')))) + '</a>' +
     (m1 <= LAST.slice(0, 7) ? '<a href="' + urlMonth(m1) + '">' + esc(cap(fMY.format(utcOf(m1 + '-01')))) + '</a>' : '') + '</nav>');
   if (articles.length) {
     L.push('<h2 class="fpol"><em>Artykuły</em> astrologiczne</h2><nav class="seol" aria-label="Artykuły">' +
@@ -85,8 +84,8 @@ function seoLinks() {
   }
   return L.join('\n');
 }
-const SEOLINKS = seoLinks();
-FOOTER = FOOTER.replace('<!--SEOLINKS-->', SEOLINKS);
+const SEOLINKS = seoLinks(true);   // strona główna: kolejne 7 dni liczone od dzisiejszej daty (przy każdej przebudowie)
+FOOTER = FOOTER.replace('<!--SEOLINKS-->', seoLinks(false));   // podstrony: stała stopka (bez dni), żeby nie zmieniać 1000+ plików codziennie
 
 const PERSON = { '@type': 'Person', name: 'Mariusz Staszewski', jobTitle: 'Astrolog', telephone: '+48737803692', url: SITE + '/' };
 const sitemap = [];
