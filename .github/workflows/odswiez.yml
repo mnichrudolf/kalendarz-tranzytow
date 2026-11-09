@@ -3,6 +3,7 @@ name: Odśwież dane kalendarza
 on:
   schedule:
     - cron: "17 3 1 * *"   # 1. dnia każdego miesiąca, ok. 4:17 czasu polskiego
+    - cron: "10 2 * * *"     # codziennie: przebudowa podstron i listy „najbliższe dni” (bez nowego generowania danych)
   workflow_dispatch: {}      # przycisk „Run workflow" do ręcznego odświeżenia
   push:                      # zmiana artykułów (panel) przebudowuje stronę automatycznie
     branches: [main]
@@ -29,7 +30,7 @@ jobs:
           node-version: "20"
       - run: pip install pyswisseph fonttools brotli
       - name: Dane tranzytów
-        if: github.event_name != 'push'
+        if: github.event_name != 'push' && github.event.schedule != '10 2 * * *'
         run: python generate.py
       - run: python build.py
       - run: node build_pages.js
